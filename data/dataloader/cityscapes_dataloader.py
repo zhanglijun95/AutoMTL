@@ -24,7 +24,7 @@ class CityScapes(Dataset):
         self.IMG_MEAN = np.array((104.00698793, 116.66876762, 122.67891434), dtype=np.float32)
         self.IMG_MEAN = np.tile(self.IMG_MEAN[np.newaxis, np.newaxis, :], (self.crop_h, self.crop_w, 1))
         
-        json_file = 'data/utils/cityscape.json'
+        json_file = dataroot + 'cityscape.json'
         with open(json_file, 'r') as f:
             info = json.load(f)
         self.files = info[self.mode]

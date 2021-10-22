@@ -131,7 +131,7 @@ class Trainer():
             ################ delete if not needed ############
             if (i+1) % 10000 == 0:
                 for g in policy_op.param_groups:
-                    g['lr'] = 0.001
+                    g['lr'] *= 0.3
                     print('lr changed')
             #################################################
                     
@@ -221,7 +221,8 @@ class Trainer():
         self.set_train_loss_data_iter()
         return
     
-    def post_train(self, iters, lr=0.001, task_iters=None, decay_lr_freq=4000, decay_lr_rate=0.5, writerPath=None, savePath=None, reload=None):
+    def post_train(self, iters, lr=0.001, task_iters=None, loss_lambda=None, 
+                  decay_lr_freq=4000, decay_lr_rate=0.5, writerPath=None, savePath=None, reload=None):
         self.model.train()
         # Key point: set grad of parameters of policy to be false
         if writerPath != None:
@@ -254,9 +255,9 @@ class Trainer():
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=decay_lr_freq, gamma=decay_lr_rate)
 
         for i in range(start, iters):
-            # Step 2: Train the network with binary policy
+            # Step 2: Train the network with policy
             if task_iters is None:
-                self.train_step('mtl', optimizer, scheduler, hard=True)
+                self.train_step('mtl', optimizer, scheduler, hard=True, loss_lambda=loss_lambda)
             else:
                 task_idx = self.which_task(i, task_iters)
                 self.train_step_task('mtl', self.tasks[task_idx], optimizer, scheduler, hard=True)
@@ -279,7 +280,7 @@ class Trainer():
         return
     
     # Helper Functions - Train and Validation
-    def train_step(self, stage, optimizer, scheduler=None, tau=1, hard=False, policy_idx=None):
+    def train_step(self, stage, optimizer, scheduler=None, tau=1, hard=False, policy_idx=None, loss_lambda=None):
         # Function: Train one iter for each task 
         for task in self.tasks:
             try:
@@ -299,6 +300,14 @@ class Trainer():
                 loss = self.criterion_dict[task](output, y, data['mask'].cuda())
             else:
                 loss = self.criterion_dict[task](output, y)
+                
+            if isinstance(loss_lambda, dict):
+                loss = loss_lambda[task] * loss 
+            elif loss_lambda is None:
+                pass
+            else:
+                sys.exit('Loss weights (lambda) should be in the type of dictionary.')
+            
             loss.backward()
             optimizer.step()
             self.loss_list[task].append(loss.item())  
@@ -472,6 +481,11 @@ class Trainer():
         torch.save(state, savePath + stage + '_' + str(i+1) + 'iter.model')
         if os.path.exists(savePath + stage + '_' + str((i+1)-(self.save_num*self.save_iters))+'iter.model'):
               os.remove(savePath + stage + '_' + str((i+1)-(self.save_num*self.save_iters))+'iter.model')
+        return
+    
+    def load_model(self, savePath, reload):
+        state = torch.load(savePath + reload)
+        self.model.load_state_dict(state['state_dict'])
         return
     
     # Helper Functions - Utils

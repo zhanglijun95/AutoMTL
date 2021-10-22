@@ -226,15 +226,15 @@ class ComputeNode(nn.Module):
             else:
                 # Conv2d
                 policy_task = self.policy[task]
-                possiblity = nn.functional.gumbel_softmax(policy_task, tau=tau, hard=hard)
                 if hard is False:
                     # Policy-train
+                    possiblity = nn.functional.gumbel_softmax(policy_task, tau=tau, hard=hard)
                     feature_common  = self.compute_common()
                     feature_specific = self.compute_specific(task)
                     feature_downsample = self.compute_downsample(task)
                     feature = feature_common*possiblity[0] + feature_specific*possiblity[1] + feature_downsample*possiblity[2]
                 else:
-                    # Re-train or Validation
+                    # Post-train or Validation
                     branch = torch.argmax(policy_task).item()
                     if branch == 0:
                         feature = self.compute_common()

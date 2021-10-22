@@ -10,7 +10,7 @@ import sys
 import warnings
 
 class MTLModel(nn.Module):
-    def __init__(self, prototxt, headsDict={'basic': None}, BNsp=False):
+    def __init__(self, prototxt, headsDict={'basic': None}, BNsp=True):
         super(MTLModel, self).__init__()
         self.prototxt = self.parse_prototxt(prototxt)
         self.taskList = list(headsDict.keys())
@@ -41,7 +41,7 @@ class MTLModel(nn.Module):
             # Step 1: Find fatherNodes: CNode whose top name is the bottom name needed
             #         Handle with the 1st layer differently with InputNode
             fatherNodeList = []
-            if protoLayer.bottom == ['data']:
+            if protoLayer.bottom == ['data'] or protoLayer.bottom == ['blob1']:
                 self.inputNode = InputNode(self.prototxt.input_dim[1])
                 fatherNodeList.append(self.inputNode)
             else:
@@ -133,6 +133,7 @@ class MTLModel(nn.Module):
                     ##########################################################################
                     # Reg design2: loss = e^ (g(b) - g(a)) + e^(g(c) - g(a)) 
 #                     loss = torch.exp(scale * (possiblity[1]-possiblity[0])) + torch.exp(scale * (possiblity[2]-possiblity[0]))
+                    ##########################################################################
                     # Reg design3: ln(1+e ^ (g(b) - g(a))) + ln(1+e ^ (g(c) - g(a)))
                     loss = torch.log(1+torch.exp(scale * (possiblity[1]-possiblity[0]))) + torch.log(1+torch.exp(scale * (possiblity[2]-possiblity[0])))
                     weight = (self.max_node_depth() - node.depth) / self.max_node_depth()

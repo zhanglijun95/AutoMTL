@@ -57,6 +57,9 @@ layer {
   type: "ReLU"
   bottom: "conv1/bn"
   top: "conv1/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv2_1/expand"
@@ -103,6 +106,9 @@ layer {
   type: "ReLU"
   bottom: "conv2_1/expand/bn"
   top: "conv2_1/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv2_1/dwise"
@@ -152,6 +158,9 @@ layer {
   type: "ReLU"
   bottom: "conv2_1/dwise/bn"
   top: "conv2_1/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv2_1/linear"
@@ -238,6 +247,9 @@ layer {
   type: "ReLU"
   bottom: "conv2_2/expand/bn"
   top: "conv2_2/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv2_2/dwise"
@@ -288,6 +300,9 @@ layer {
   type: "ReLU"
   bottom: "conv2_2/dwise/bn"
   top: "conv2_2/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv2_2/linear"
@@ -374,6 +389,9 @@ layer {
   type: "ReLU"
   bottom: "conv3_1/expand/bn"
   top: "conv3_1/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv3_1/dwise"
@@ -423,6 +441,9 @@ layer {
   type: "ReLU"
   bottom: "conv3_1/dwise/bn"
   top: "conv3_1/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv3_1/linear"
@@ -516,6 +537,9 @@ layer {
   type: "ReLU"
   bottom: "conv3_2/expand/bn"
   top: "conv3_2/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv3_2/dwise"
@@ -566,6 +590,9 @@ layer {
   type: "ReLU"
   bottom: "conv3_2/dwise/bn"
   top: "conv3_2/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv3_2/linear"
@@ -652,6 +679,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_1/expand/bn"
   top: "conv4_1/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_1/dwise"
@@ -701,6 +731,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_1/dwise/bn"
   top: "conv4_1/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_1/linear"
@@ -794,6 +827,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_2/expand/bn"
   top: "conv4_2/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_2/dwise"
@@ -843,6 +879,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_2/dwise/bn"
   top: "conv4_2/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_2/linear"
@@ -936,6 +975,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_3/expand/bn"
   top: "conv4_3/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_3/dwise"
@@ -985,6 +1027,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_3/dwise/bn"
   top: "conv4_3/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_3/linear"
@@ -1071,6 +1116,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_4/expand/bn"
   top: "conv4_4/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_4/dwise"
@@ -1120,6 +1168,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_4/dwise/bn"
   top: "conv4_4/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_4/linear"
@@ -1213,6 +1264,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_5/expand/bn"
   top: "conv4_5/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_5/dwise"
@@ -1262,6 +1316,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_5/dwise/bn"
   top: "conv4_5/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_5/linear"
@@ -1355,6 +1412,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_6/expand/bn"
   top: "conv4_6/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_6/dwise"
@@ -1404,6 +1464,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_6/dwise/bn"
   top: "conv4_6/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_6/linear"
@@ -1497,6 +1560,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_7/expand/bn"
   top: "conv4_7/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_7/dwise"
@@ -1547,6 +1613,9 @@ layer {
   type: "ReLU"
   bottom: "conv4_7/dwise/bn"
   top: "conv4_7/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv4_7/linear"
@@ -1633,6 +1702,9 @@ layer {
   type: "ReLU"
   bottom: "conv5_1/expand/bn"
   top: "conv5_1/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv5_1/dwise"
@@ -1682,6 +1754,9 @@ layer {
   type: "ReLU"
   bottom: "conv5_1/dwise/bn"
   top: "conv5_1/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv5_1/linear"
@@ -1775,6 +1850,9 @@ layer {
   type: "ReLU"
   bottom: "conv5_2/expand/bn"
   top: "conv5_2/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv5_2/dwise"
@@ -1824,6 +1902,9 @@ layer {
   type: "ReLU"
   bottom: "conv5_2/dwise/bn"
   top: "conv5_2/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv5_2/linear"
@@ -1917,6 +1998,9 @@ layer {
   type: "ReLU"
   bottom: "conv5_3/expand/bn"
   top: "conv5_3/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv5_3/dwise"
@@ -1967,6 +2051,9 @@ layer {
   type: "ReLU"
   bottom: "conv5_3/dwise/bn"
   top: "conv5_3/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv5_3/linear"
@@ -2053,6 +2140,9 @@ layer {
   type: "ReLU"
   bottom: "conv6_1/expand/bn"
   top: "conv6_1/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv6_1/dwise"
@@ -2102,6 +2192,9 @@ layer {
   type: "ReLU"
   bottom: "conv6_1/dwise/bn"
   top: "conv6_1/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv6_1/linear"
@@ -2195,6 +2288,9 @@ layer {
   type: "ReLU"
   bottom: "conv6_2/expand/bn"
   top: "conv6_2/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv6_2/dwise"
@@ -2244,6 +2340,9 @@ layer {
   type: "ReLU"
   bottom: "conv6_2/dwise/bn"
   top: "conv6_2/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv6_2/linear"
@@ -2337,6 +2436,9 @@ layer {
   type: "ReLU"
   bottom: "conv6_3/expand/bn"
   top: "conv6_3/expand/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv6_3/dwise"
@@ -2386,6 +2488,9 @@ layer {
   type: "ReLU"
   bottom: "conv6_3/dwise/bn"
   top: "conv6_3/dwise/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 layer {
   name: "conv6_3/linear"
@@ -2472,6 +2577,9 @@ layer {
   type: "ReLU"
   bottom: "conv6_4/bn"
   top: "conv6_4/bn"
+  relu_param {
+    inplace: 1
+  }
 }
 #layer {
 #  name: "pool6"

@@ -110,9 +110,8 @@ mtlmodel = mtlmodel.cuda()
 
 ######## Generate random policy #######
 random_path = args.projectroot + args.ckpt_dir + 'random/' + str(args.shared) + '-' + str(args.seed) + '/'
+Path(random_path).mkdir(parents=True, exist_ok=True)
 if args.skip_random is False:
-    Path(random_path).mkdir(parents=True, exist_ok=True)
-
     torch.manual_seed(args.seed)
     state = torch.load(args.projectroot + args.ckpt_dir + args.reload_ckpt)
     mtlmodel.load_state_dict(state['state_dict'], strict=False)
