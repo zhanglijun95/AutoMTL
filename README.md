@@ -48,21 +48,99 @@ We conducted experiments on three popular datasets in multi-task learning (MTL),
 Our code can be divided into three parts: code for data, code of AutoMTL, and others
 
 * For Data
-  *  Dataloaders
-  *  Heads
-  *  Metrics
+  *  Dataloaders ```*_dataloader.py```: 
+  For each dataset, we offer a corresponding PyTorch dataloader with a specific _task_ variable.
+  *  Heads ```pixel2pixel.py```: 
+  The **ASPP** head [[4]](#4) is implemented for the pixel-to-pixel vision tasks.
+  *  Metrics ```pixel2pixel_loss/metrics.py```: 
+  For each task, it has its own criterion and metric.
 
 * AutoMTL
-  * Multi-Task Model Generator
-  * Trainer Tools
+  * Multi-Task Model Generator ```mtl_model.py```:
+  Transfer the given backbone model in the format of _prototxt_, and the task-specific model head dictionary to a multi-task supermodel.
+  * Trainer Tools ```trainer.py```:
+  Meterialize a three-stage training pipeline to search out a good multi-task model for the given tasks.
   ![pipeline](https://github.com/zhanglijun95/AutoMTL/blob/main/assets/pipeline.jpg)
   
 * Others
-  *  Input Backbone
-  *  Transfer to Prototxt
+  *  Input Backbone ```*.prototxt```:
+  Typical vision backbone models including **Deeplab-ResNet34** [[4]](#4), **MobileNetV2**, and **MNasNet**.
+  *  Transfer to Prototxt ```pytorch_to_caffe.py```:
+  If you define your own customized backbone model in PyTorch API, we also provide a tool to convert it to a prototxt file.
 
 # How to Use
-[TODO: detailed explanations]
+## Set up Data
+Each task will have its own **dataloader** for both training and validation, **task-specific criterion (loss), evaluation metric, and model head**. Here we take CityScapes as an example. 
+``` bash
+tasks = ['segment_semantic', 'depth_zbuffer']
+task_cls_num = {'segment_semantic': 19, 'depth_zbuffer': 1} # the number of classes in each task
+```
+
+You can also define your own dataloader, criterion, and evaluation metrics. Please refer to files in ```data/``` to make sure your customized classes have the same output format as ours to fit for our framework.
+
+### dataloader dictionary
+``` bash
+trainDataloaderDict = {}
+valDataloaderDict = {}
+for task in tasks:
+    dataset = CityScapes(dataroot, 'train', task, crop_h=224, crop_w=224)
+    trainDataloaderDict[task] = DataLoader(dataset, <batch_size>, shuffle=True)
+
+    dataset = CityScapes(dataroot, 'test', task)
+    valDataloaderDict[task] = DataLoader(dataset, <batch_size>, shuffle=True)
+```
+
+### criterion dictionary
+``` bash
+criterionDict = {}
+for task in tasks:
+    criterionDict[task] = CityScapesCriterions(task)
+```
+
+### evaluation metric dictionary
+``` bash
+metricDict = {}
+for task in tasks:
+    metricDict[task] = CityScapesMetrics(task)
+```
+
+### task-specific heads dictionary
+``` bash
+headsDict = nn.ModuleDict() # must be nn.ModuleDict() instead of python dictionary
+for task in tasks:
+    headsDict[task] = ASPPHeadNode(<feature_dim>, task_cls_num[task])
+```
+
+## Construct Multi-Task Supermodel
+``` bash
+prototxt = 'models/deeplab_resnet34_adashare.prototxt' # can be any CNN model
+mtlmodel = MTLModel(prototxt, headsDict)
+```
+
+## 3-stage Training
+### define the trainer
+``` bash
+trainer = Trainer(mtlmodel, trainDataloaderDict, valDataloaderDict, criterionDict, metricDict)
+```
+### pre-train phase
+``` bash
+trainer.pre_train(iters=<total_iter>, lr=<init_lr>, savePath=<save_path>)
+```
+### policy-train phase
+``` bash
+loss_lambda = {'segment_semantic': 1, 'depth_zbuffer': 1, 'policy':0.0005} # the weights for each task and the policy regularization term from the paper
+trainer.alter_train_with_reg(iters=<total_iter>, policy_network_iters=<alter_iters>, policy_lr=<policy_lr>, network_lr=<network_lr>, 
+                             loss_lambda=loss_lambda, savePath=<save_path>)
+```
+Notice that when training the policy and the model weights together, we alternatively train them for specified iters in ```policy_network_iters```.
+
+### post-train phase
+``` bash
+trainer.post_train(ters=<total_iter>, lr=<init_lr>, 
+                   loss_lambda=loss_lambda, savePath=<save_path>, reload=<policy_train_model_name>)
+```
+
+**Note**: Please refer to ```Example.ipynb``` for more details. 
 
 # References
 <a id="1">[1]</a> 
@@ -79,3 +157,8 @@ ECCV, 746-760, 2012.
 Zamir, Amir R and Sax, Alexander and Shen, William and Guibas, Leonidas J and Malik, Jitendra and Savarese, Silvio. 
 Taskonomy: Disentangling task transfer learning. 
 CVPR, 3712-3722, 2018.
+
+<a id="4">[4]</a> 
+Chen, Liang-Chieh and Papandreou, George and Kokkinos, Iasonas and Murphy, Kevin and Yuille, Alan L. 
+Deeplab: Semantic image segmentation with deep convolutional nets, atrous convolution, and fully connected crfs. 
+PAMI, 834-848, 2017.
