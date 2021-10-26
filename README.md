@@ -1,6 +1,6 @@
 # AutoMTL: A Programming Framework for Automated Multi-Task Learning 
 This is the website for our paper "AutoMTL: A Programming Framework for Automated Multi-Task Learning", submitted to MLSys 2022. 
-The arXiv version will be public at Tue, 26 Oct 2021.
+The arXiv version can be found [here](https://arxiv.org/pdf/2110.13076.pdf).
 
 ### Abstract
 Multi-task learning (MTL) jointly learns a set of tasks. It is a promising approach to reduce the training and inference time and storage costs while improving prediction accuracy and generalization performance for many computer vision tasks. However, a major barrier preventing the widespread adoption of MTL is the lack of systematic support for developing compact multi-task models given a set of tasks. In this paper, we aim to remove the barrier by developing the first programming framework AutoMTL that automates MTL model development. AutoMTL takes as inputs an arbitrary backbone convolutional neural network and a set of tasks to learn, then automatically produce a multi-task model that achieves high accuracy and has small memory footprint simultaneously. As a programming framework, AutoMTL could facilitate the development of MTL-enabled computer vision applications and even further improve task performance.
@@ -9,7 +9,16 @@ Multi-task learning (MTL) jointly learns a set of tasks. It is a promising appro
 
 ### Cite
 Welcome to cite our work if you find it is helpful to your research.
-[TODO: cite info]
+```
+@misc{zhang2021automtl,
+      title={AutoMTL: A Programming Framework for Automated Multi-Task Learning}, 
+      author={Lijun Zhang and Xiao Liu and Hui Guan},
+      year={2021},
+      eprint={2110.13076},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
 
 # Description
 ### Environment
