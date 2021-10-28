@@ -78,6 +78,8 @@ Our code can be divided into three parts: code for data, code of AutoMTL, and ot
   If you define your own customized backbone model in PyTorch API, we also provide a tool to convert it to a prototxt file.
 
 # How to Use
+**Note**: Please refer to ```Example.ipynb``` for more details. 
+
 ## Set up Data
 Each task will have its own **dataloader** for both training and validation, **task-specific criterion (loss), evaluation metric, and model head**. Here we take CityScapes as an example. 
 ``` bash
@@ -142,7 +144,7 @@ loss_lambda = {'segment_semantic': 1, 'depth_zbuffer': 1, 'policy':0.0005} # the
 trainer.alter_train_with_reg(iters=<total_iter>, policy_network_iters=<alter_iters>, policy_lr=<policy_lr>, network_lr=<network_lr>, 
                              loss_lambda=loss_lambda, savePath=<save_path>)
 ```
-Notice that when training the policy and the model weights together, we alternatively train them for specified iters in ```policy_network_iters```.
+**Note**: When training the policy and the model weights together, we alternatively train them for specified iters in ```policy_network_iters```.
 
 ### sample policy from trained policy distribution
 ``` bash
@@ -159,7 +161,7 @@ for task in tasks:
         elif choice == 2:
             sample_policy_dict[name] = torch.tensor([0.0,0.0,1.0]).cuda()
 ```
-**Note**: Please refer to ```Example.ipynb``` for more details. 
+**Note**: The policy-train stage only obtains a good policy distribution. Before conducting post-train, we should sample a certain policy from the distribution.
 
 ### post-train phase
 ``` bash
