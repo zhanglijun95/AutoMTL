@@ -171,8 +171,9 @@ trainer.post_train(ters=<total_iter>, lr=<init_lr>,
 
 ## Inference from Trained Model
 ``` bash 
-output = mtlmodel(x, task='segment_semantic', hard=True)
+output = mtlmodel(x, task=<task_name>, hard=True)
 ```
+**Note**: The "hard" must be set to True when conducting inference since we don't want to have soft policy this time.
 You can also download fully-trained model here. [TODO: Add trained model for each task]
 
 # References
