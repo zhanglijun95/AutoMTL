@@ -88,7 +88,7 @@ class MTLModel(nn.Module):
             sys.exit('No such CNode with required top name: ' + topName)
         return CNode
         
-    def forward(self, x, stage, task=None, tau=5, hard=False, policy_idx=None):
+    def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
         # Step 1: Obtain features from the backbone model
         self.inputNode.set_data(x)
         for node in self.net:
