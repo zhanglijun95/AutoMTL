@@ -126,7 +126,7 @@ prototxt = 'models/deeplab_resnet34_adashare.prototxt' # can be any CNN model
 mtlmodel = MTLModel(prototxt, headsDict)
 ```
 
-## 3-stage Training
+## 3-Stage Training
 ### define the trainer
 ``` bash
 trainer = Trainer(mtlmodel, trainDataloaderDict, valDataloaderDict, criterionDict, metricDict)
@@ -135,6 +135,7 @@ trainer = Trainer(mtlmodel, trainDataloaderDict, valDataloaderDict, criterionDic
 ``` bash
 trainer.pre_train(iters=<total_iter>, lr=<init_lr>, savePath=<save_path>)
 ```
+
 ### policy-train phase
 ``` bash
 loss_lambda = {'segment_semantic': 1, 'depth_zbuffer': 1, 'policy':0.0005} # the weights for each task and the policy regularization term from the paper
@@ -143,13 +144,36 @@ trainer.alter_train_with_reg(iters=<total_iter>, policy_network_iters=<alter_ite
 ```
 Notice that when training the policy and the model weights together, we alternatively train them for specified iters in ```policy_network_iters```.
 
+### sample policy from trained policy distribution
+``` bash
+sample_policy_dict = OrderedDict()
+for task in tasks:
+    for name, policy in zip(name_list[task], policy_list[task]):
+        distribution = softmax(policy, axis=-1)
+        distribution /= sum(distribution)
+        choice = np.random.choice((0,1,2), p=distribution)
+        if choice == 0:
+            sample_policy_dict[name] = torch.tensor([1.0,0.0,0.0]).cuda()
+        elif choice == 1:
+            sample_policy_dict[name] = torch.tensor([0.0,1.0,0.0]).cuda()
+        elif choice == 2:
+            sample_policy_dict[name] = torch.tensor([0.0,0.0,1.0]).cuda()
+```
+
 ### post-train phase
 ``` bash
 trainer.post_train(ters=<total_iter>, lr=<init_lr>, 
-                   loss_lambda=loss_lambda, savePath=<save_path>, reload=<policy_train_model_name>)
+                   loss_lambda=loss_lambda, savePath=<save_path>, reload=<sampled_policy>)
 ```
 
 **Note**: Please refer to ```Example.ipynb``` for more details. 
+
+## Inference from Trained Model
+``` bash 
+output = mtlmodel(x, task='segment_semantic', hard=True)
+```
+
+You can also download fully-trained model here. [TODO: Add trained model for each task]
 
 # References
 <a id="1">[1]</a> 
