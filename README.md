@@ -159,6 +159,7 @@ for task in tasks:
         elif choice == 2:
             sample_policy_dict[name] = torch.tensor([0.0,0.0,1.0]).cuda()
 ```
+**Note**: Please refer to ```Example.ipynb``` for more details. 
 
 ### post-train phase
 ``` bash
@@ -166,13 +167,10 @@ trainer.post_train(ters=<total_iter>, lr=<init_lr>,
                    loss_lambda=loss_lambda, savePath=<save_path>, reload=<sampled_policy>)
 ```
 
-**Note**: Please refer to ```Example.ipynb``` for more details. 
-
 ## Inference from Trained Model
 ``` bash 
 output = mtlmodel(x, task='segment_semantic', hard=True)
 ```
-
 You can also download fully-trained model here. [TODO: Add trained model for each task]
 
 # References
