@@ -169,12 +169,19 @@ trainer.post_train(ters=<total_iter>, lr=<init_lr>,
                    loss_lambda=loss_lambda, savePath=<save_path>, reload=<sampled_policy>)
 ```
 
-## Inference from Trained Model
-``` bash 
-output = mtlmodel(x, task=<task_name>, hard=True)
+## Validation Results in the Paper
+You can download fully-trained models for each dataset [here](https://drive.google.com/drive/folders/16dYXhyeZt2jgMyt3B4uDtcUhENIC1TUZ?usp=sharing).
+``` bash
+mtlmodel.load_state_dict(torch.load(<model_name>))
+trainer.validate('mtl', hard=True)
 ```
 **Note**: The "hard" must be set to True when conducting inference since we don't want to have soft policy this time.
-You can also download fully-trained model here. [TODO: Add trained model for each task]
+
+## Inference from Trained Model
+``` bash 
+mtlmodel.load_state_dict(torch.load(<model_name>))
+output = mtlmodel(x, task=<task_name>, hard=True)
+```
 
 # References
 <a id="1">[1]</a> 
