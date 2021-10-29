@@ -172,11 +172,11 @@ class TaskonomyMetrics(DataMetrics):
         
     def define_refer(self):
         if self.task is 'segment_semantic':
-            self.refer = {'err': 0.517}
+            self.refer = {'err': 0.575}
         elif self.task is 'normal':
-            self.refer = {'cosine_similarity': 0.716}
+            self.refer = {'cosine_similarity': 0.807}
         elif self.task is 'depth_zbuffer':
-            self.refer = {'abs_err': 0.021}
+            self.refer = {'abs_err': 0.022}
         elif self.task is 'keypoints2d':
             self.refer = {'err': 0.197}
         elif self.task is 'edge_texture':
@@ -238,9 +238,9 @@ class CityScapesMetrics(DataMetrics):
         
     def define_refer(self):
         if self.task is 'segment_semantic':
-            self.refer = {'mIoU': 0.402, 'Pixel Acc': 0.747}
+            self.refer = {'mIoU': 0.365, 'Pixel Acc': 0.738}
         elif self.task is 'depth_zbuffer':
-            self.refer = {'abs_err': 0.017, 'rel_err': 0.33, 'sigma_1.25': 70.3, 'sigma_1.25^2': 86.3, 'sigma_1.25^3': 93.3}
+            self.refer = {'abs_err': 0.026, 'rel_err': 0.38, 'sigma_1.25': 57.5, 'sigma_1.25^2': 76.9, 'sigma_1.25^3': 87}
         
      # Call after evaluate all data in the set
     def val_metrics(self):
@@ -308,11 +308,11 @@ class NYUMetrics(DataMetrics):
                 self.refer = {'Angle Mean': 15, 'Angle Median': 11.5, 'Angle 11.25': 49.2, 'Angle 22.5': 76.7, 'Angle 30': 86.8}
         elif self.task_num == 3:
             if self.task is 'segment_semantic':
-                self.refer = {'mIoU': 0.275, 'Pixel Acc': 0.589}
+                self.refer = {'mIoU': 0.265, 'Pixel Acc': 0.582}
             elif self.task is 'normal':
-                self.refer = {'Angle Mean': 17.5, 'Angle Median': 14.2, 'Angle 11.25': 34.9, 'Angle 22.5': 73.3, 'Angle 30': 85.7}
+                self.refer = {'Angle Mean': 17.7, 'Angle Median': 16.3, 'Angle 11.25': 29.4, 'Angle 22.5': 72.3, 'Angle 30': 87.3}
             elif self.task is 'depth_zbuffer':
-                self.refer = {'abs_err': 0.62, 'rel_err': 0.25, 'sigma_1.25': 57.9, 'sigma_1.25^2': 85.8, 'sigma_1.25^3': 95.7}
+                self.refer = {'abs_err': 0.62, 'rel_err': 0.24, 'sigma_1.25': 57.8, 'sigma_1.25^2': 85.8, 'sigma_1.25^3': 96}
         
      # Call after evaluate all data in the set
     def val_metrics(self):

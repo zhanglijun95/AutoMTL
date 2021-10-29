@@ -382,7 +382,7 @@ class Trainer():
             scheduler.step()
         return
     
-    def validate(self, stage, it, tau=1, hard=False, writer=None, policy_idx=None):
+    def validate(self, stage, it=0, tau=1, hard=False, writer=None, policy_idx=None):
         self.model.eval()
         for task in self.tasks:
             loss_list = []
