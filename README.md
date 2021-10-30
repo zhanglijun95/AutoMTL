@@ -127,6 +127,7 @@ for task in tasks:
 prototxt = 'models/deeplab_resnet34_adashare.prototxt' # can be any CNN model
 mtlmodel = MTLModel(prototxt, headsDict)
 ```
+**Note**: We currently support [TODO: op types]
 
 ## 3-Stage Training
 ### define the trainer
