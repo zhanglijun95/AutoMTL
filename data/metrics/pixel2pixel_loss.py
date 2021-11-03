@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 import torch
 import torch.nn as nn
@@ -59,31 +60,31 @@ class DataCriterions(nn.Module):
         return loss
         
     def forward(self, pred, gt, mask=None):
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             return self.seg_loss(pred, gt)
-        elif self.task is 'normal':
+        elif self.task == 'normal':
             return self.sn_loss(pred, gt, mask)
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             return self.depth_loss(pred, gt, mask)
-        elif self.task is 'keypoints2d' or self.task is 'edge_texture':
+        elif self.task == 'keypoints2d' or self.task == 'edge_texture':
             return self.keypoint_edge_loss(pred, gt)
         
 class TaskonomyCriterions(DataCriterions):
-    def __init__(self, task):
+    def __init__(self, task, dataroot):
         super(TaskonomyCriterions, self).__init__(task)
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.num_seg_cls = 17
-        self.define_loss()
+        self.define_loss(dataroot)
         
-    def define_loss(self):
+    def define_loss(self, dataroot):
         super(TaskonomyCriterions, self).define_loss()
-        weight = torch.from_numpy(np.load('data/utils/semseg_prior_factor.npy')).cuda().float()
+        weight = torch.from_numpy(np.load(os.path.join(dataroot, 'semseg_prior_factor.npy'))).cuda().float()
         self.cross_entropy = nn.CrossEntropyLoss(weight=weight, ignore_index=255)
         
 class CityScapesCriterions(DataCriterions):
     def __init__(self, task):
         super(CityScapesCriterions, self).__init__(task)
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.num_seg_cls = 19
         self.define_loss()
         
@@ -94,7 +95,7 @@ class CityScapesCriterions(DataCriterions):
 class NYUCriterions(DataCriterions):
     def __init__(self, task):
         super(NYUCriterions, self).__init__(task)
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.num_seg_cls = 40
         self.define_loss()
         

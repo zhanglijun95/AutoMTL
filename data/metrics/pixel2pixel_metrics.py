@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import numpy as np
+import os
 from sklearn.metrics import confusion_matrix
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -18,13 +19,13 @@ class DataMetrics(object):
         
     def reset_records(self):
         self.batch_size = []
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.records = {'mIoUs': [], 'pixelAccs': [],  'errs': [], 'conf_mat': np.zeros((self.num_seg_cls, self.num_seg_cls)), 'labels': np.arange(self.num_seg_cls)}
-        elif self.task is 'normal':
+        elif self.task == 'normal':
             self.records = {'cos_similaritys': []}
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             self.records = {'abs_errs': [], 'rel_errs': [], 'sq_rel_errs': [], 'ratios': [], 'rms': [], 'rms_log': []}
-        elif self.task is 'keypoints2d' or self.task is 'edge_texture':
+        elif self.task == 'keypoints2d' or self.task == 'edge_texture':
             self.records = {'errs': []}
         
     def resize_pred(self, pred, gt):
@@ -130,13 +131,13 @@ class DataMetrics(object):
     def __call__(self, pred, gt, mask=None):
         self.batch_size.append(len(gt))
         
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.__seg_records(pred, gt)
-        elif self.task is 'normal':
+        elif self.task == 'normal':
             self.__sn_records(pred, gt, mask)
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             self.__depth_records(pred, gt, mask)
-        elif self.task is 'keypoints2d' or self.task is 'edge_texture':
+        elif self.task == 'keypoints2d' or self.task == 'edge_texture':
             self.__keypoint_edge_records(pred, gt)
         return
     
@@ -156,41 +157,41 @@ class DataMetrics(object):
         return
     
 class TaskonomyMetrics(DataMetrics):
-    def __init__(self, task):
+    def __init__(self, task, dataroot):
         super(TaskonomyMetrics, self).__init__(task)
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.num_seg_cls = 17
         
-        self.define_loss()
+        self.define_loss(dataroot)
         self.define_refer()
         self.reset_records()
         
-    def define_loss(self):
+    def define_loss(self, dataroot):
         super(TaskonomyMetrics, self).define_loss()
-        weight = torch.from_numpy(np.load('data/utils/semseg_prior_factor.npy')).cuda().float()
+        weight = torch.from_numpy(np.load(os.path.join(dataroot, 'semseg_prior_factor.npy'))).cuda().float()
         self.cross_entropy = nn.CrossEntropyLoss(weight=weight, ignore_index=255)
         
     def define_refer(self):
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.refer = {'err': 0.575}
-        elif self.task is 'normal':
+        elif self.task == 'normal':
             self.refer = {'cosine_similarity': 0.807}
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             self.refer = {'abs_err': 0.022}
-        elif self.task is 'keypoints2d':
+        elif self.task == 'keypoints2d':
             self.refer = {'err': 0.197}
-        elif self.task is 'edge_texture':
+        elif self.task == 'edge_texture':
             self.refer = {'err': 0.212}
         
      # Call after evaluate all data in the set
     def val_metrics(self):
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             val_metrics = self.__seg_metrics()
-        elif self.task is 'normal':
+        elif self.task == 'normal':
             val_metrics = self.__sn_metrics()
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             val_metrics = self.__depth_metrics()
-        elif self.task is 'keypoints2d' or self.task is 'edge_texture':
+        elif self.task == 'keypoints2d' or self.task == 'edge_texture':
             val_metrics = self.__keypoint_edge_metrics()
         self.reset_records()
         return self.round_dict(val_metrics)
@@ -225,7 +226,7 @@ class TaskonomyMetrics(DataMetrics):
 class CityScapesMetrics(DataMetrics):
     def __init__(self, task):
         super(CityScapesMetrics, self).__init__(task)
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.num_seg_cls = 19
         
         self.define_loss()
@@ -237,16 +238,16 @@ class CityScapesMetrics(DataMetrics):
         self.cross_entropy = nn.CrossEntropyLoss(ignore_index=-1)
         
     def define_refer(self):
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.refer = {'mIoU': 0.365, 'Pixel Acc': 0.738}
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             self.refer = {'abs_err': 0.026, 'rel_err': 0.38, 'sigma_1.25': 57.5, 'sigma_1.25^2': 76.9, 'sigma_1.25^3': 87}
         
      # Call after evaluate all data in the set
     def val_metrics(self):
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             val_metrics = self.__seg_metrics()
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             val_metrics = self.__depth_metrics()
         self.reset_records()
         return self.round_dict(val_metrics)
@@ -288,7 +289,7 @@ class CityScapesMetrics(DataMetrics):
 class NYUMetrics(DataMetrics):
     def __init__(self, task, task_num=3):
         super(NYUMetrics, self).__init__(task)
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             self.num_seg_cls = 40
         self.task_num = task_num
         
@@ -302,25 +303,25 @@ class NYUMetrics(DataMetrics):
         
     def define_refer(self):
         if self.task_num == 2:
-            if self.task is 'segment_semantic':
+            if self.task == 'segment_semantic':
                 self.refer = {'mIoU': 0.413, 'Pixel Acc': 0.691}
-            elif self.task is 'normal':
+            elif self.task == 'normal':
                 self.refer = {'Angle Mean': 15, 'Angle Median': 11.5, 'Angle 11.25': 49.2, 'Angle 22.5': 76.7, 'Angle 30': 86.8}
         elif self.task_num == 3:
-            if self.task is 'segment_semantic':
+            if self.task == 'segment_semantic':
                 self.refer = {'mIoU': 0.265, 'Pixel Acc': 0.582}
-            elif self.task is 'normal':
+            elif self.task == 'normal':
                 self.refer = {'Angle Mean': 17.7, 'Angle Median': 16.3, 'Angle 11.25': 29.4, 'Angle 22.5': 72.3, 'Angle 30': 87.3}
-            elif self.task is 'depth_zbuffer':
+            elif self.task == 'depth_zbuffer':
                 self.refer = {'abs_err': 0.62, 'rel_err': 0.24, 'sigma_1.25': 57.8, 'sigma_1.25^2': 85.8, 'sigma_1.25^3': 96}
         
      # Call after evaluate all data in the set
     def val_metrics(self):
-        if self.task is 'segment_semantic':
+        if self.task == 'segment_semantic':
             val_metrics = self.__seg_metrics()
-        elif self.task is 'normal':
+        elif self.task == 'normal':
             val_metrics = self.__sn_metrics()
-        elif self.task is 'depth_zbuffer':
+        elif self.task == 'depth_zbuffer':
             val_metrics = self.__depth_metrics()
         self.reset_records()
         return self.round_dict(val_metrics)

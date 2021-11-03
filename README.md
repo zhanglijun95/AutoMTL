@@ -127,7 +127,7 @@ for task in tasks:
 prototxt = 'models/deeplab_resnet34_adashare.prototxt' # can be any CNN model
 mtlmodel = MTLModel(prototxt, headsDict)
 ```
-**Note**: We currently support [TODO: op types]
+**Note**: We currently support Conv2d, BatchNorm2d, Linear, ReLU, Droupout, MaxPool2d and AvgPool2d (including global pooling), elementwise operators (inclduing production, add, and max).
 
 ## 3-Stage Training
 ### define the trainer
