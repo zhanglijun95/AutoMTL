@@ -1,5 +1,5 @@
 # AutoMTL: A Programming Framework for Automated Multi-Task Learning 
-This is the website for our paper "AutoMTL: A Programming Framework for Automated Multi-Task Learning", submitted to MLSys 2022. 
+This is the website for our paper "AutoMTL: A Programming Framework for Automated Multi-Task Learning", submitted to ICML 2022. 
 The arXiv version can be found [here](https://arxiv.org/pdf/2110.13076.pdf).
 
 ### Abstract
