@@ -37,7 +37,7 @@ class BasicNode(nn.Module):
         # Step 2: Generate Task specific Operator
         self.generate_taskOp()
 
-        self.generate_dsOp()
+        #self.generate_dsOp()
         return
 
     def generate_basicOp(self):
@@ -85,14 +85,14 @@ class Conv2Node(BasicNode):
         """
         super(Conv2Node, self).__init__(taskList=taskList, assumeSp=assumpSp)
         self.taskSp = True # there are specific task for a Conv2d Node.
-        self.conv2d = conv2d
+        self.basicOp = conv2d
         self.build_layer()
 
     def build_layer(self):
         super(Conv2Node, self).build_layer()
 
     def set_output_channels(self):
-        self.outputDim = self.conv2d.out_channels
+        self.outputDim = self. basicOp.out_channels
 
 
 class BN2dNode(BasicNode):

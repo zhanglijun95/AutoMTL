@@ -6,9 +6,10 @@ class MTL_network(nn.Module):
         super(MTL_network, self).__init__()
         self.flatten = nn.Flatten()
         self.network = nn.Sequential(
-            Conv2Node(),
-            BN2dNode(),
-            nn.Conv2d,
+            Conv2Node(taskList=['segment_semantic', 'depth_zbuffer'],
+                      conv2d=nn.Conv2d(in_channels=1, out_channels=32,
+                                       kernel_size=tuple([3, 1]))),
+            #BN2dNode(nn.BatchNorm2d(3,)),
         )
     def forward(self, x):
         x = self.flatten(x)
