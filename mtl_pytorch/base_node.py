@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 import copy
+import sys
 # Author: yiming huang
 import google.protobuf.text_format
 
@@ -13,18 +14,15 @@ class BasicNode(nn.Module):
         """ define the basic node/layer in MTL
 
         Args:
-            ## protolayer: not used here since to prototxt input is given
             taskList: A list of Task that the model wants to achieve
             assumeSp:
         """
         super().__init__()
-        # self.protoLayer = protoLayer no nned since no prototxt needed
-        # Get from bottom: fatherNode.top = CNode.bottom and fatherNode is the deepest one with the required top
-        #self.fatherNodeList = fatherNodeList  # no need, but
         self.taskList = taskList  # task list: task-specific operator()
         self.assumeSp = assumeSp  # Boolen: e.g., True for BN to be task-specific default
         self.taskOp = nn.ModuleDict()
         self.policy = nn.ParameterDict() # alpha for each task
+        self.taskSp = False
 
     def build_layer(self):
         """ pipeline for generating AutoMTL computation Node
@@ -74,35 +72,51 @@ class BasicNode(nn.Module):
                 self.dsOp[task].append(LazyLayer())
         return
 
-class Conv2Node(BasicNode):
-    def __init__(self, conv2d: nn.Conv2d, taskList=['basic'], assumpSp=False):
-        """ initialize a AutoMTL-style computation Node
+    def forward(self, x, stage='common', task=None, tau=5, hard=False): # for every input
+        """
 
         Args:
-            conv2d: a pytorch conv2d node
-            taskList: a series of tasks that MTL want to learn
-            assumpSp:
+            x: input data
+            stage: the stage for training
+            task: the task list
+            tau:
+            hard: whether to share the common parameter
+
+        Returns:
+
         """
-        super(Conv2Node, self).__init__(taskList=taskList, assumeSp=assumpSp)
-        self.taskSp = True # there are specific task for a Conv2d Node.
-        self.basicOp = conv2d
-        self.build_layer()
+        if stage == 'common':
+            return self.compute_common(x)
+        elif stage == 'hard_sharing':
+            return self.compute_hard_sharing(x)
+        elif stage == 'task_specific':
+            if task is not None:
+                return self.compute_task_weights(x, task)
+            else:
+                sys.exit('Please enter the specified task for stage==' + stage)
+        elif stage == 'combined' or stage == 'pre_train_all':
+            if task is not None:
+                return self.compute_combined(task)
+            else:
+                sys.exit('Please enter the specified task for stage==' + stage)
+        elif stage == 'mtl':
+            if len(self.taskList) > 1:
+                return self.compute_mtl(task, tau, hard)
+            else:
+                sys.exit('Only 1 task in the multi-task model. Please try stage="common".')
+        else:
+            sys.exit('No forward function for the given stage.')
 
-    def build_layer(self):
-        super(Conv2Node, self).build_layer()
+    def compute_common(self, x):
+        return self.basicOp(x)
 
-    def set_output_channels(self):
-        self.outputDim = self. basicOp.out_channels
+    def compute_hard_sharing(self, x):
+        return self.compute_common(x)
 
+    def compute_specific(self, task):
+        return self.taskOp[task](x);
 
-class BN2dNode(BasicNode):
-    def __init__(self, bn2d: nn.BatchNorm2d, taskList=['basic'], assumpSp=False):
-        super(BN2dNode, self).__init__(taskList, assumpSp)
-        self.taskSp = True
-        #         self.assumpSp = True
-        self.layerParam = 'batch_norm_param'
-        self.bn2d = bn2d
-        self.build_layer()
+    def compute_task_weights(self, x, task):
+        if self.taskSp:
+            return self.compute_common()
 
-    def build_layer(self):
-        super(BN2dNode, self).build_layer()

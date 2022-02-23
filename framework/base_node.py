@@ -27,7 +27,7 @@ class ComputeNode(nn.Module):
         self.assumeSp = assumeSp          # Boolen: e.g., True for BN to be task-specific default
         
         self.layerParam = None # String: e.g., 'convolution_param' for nn.Conv2d
-        self.paramMapping = {} # Dict: e.g., parameters in pytorch == parameters in prototxt for nn.Conv2d
+        self.paramMapping = {} # Dict: e.g., parameters in mtl_pytorch == parameters in prototxt for nn.Conv2d
         
         self.inputDim = None   # Int
         self.output = None
