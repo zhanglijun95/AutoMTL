@@ -9,9 +9,13 @@ class MTL_network(nn.Module):
         self.convNode = layer_node.Conv2Node(
             in_channels=1, out_channels=128, kernel_size=3,
             taskList=['segment_sementic', 'depth_zbuffer'])
+        self.batchNorm = layer_node.BN2dNode(
+            num_features=128
+        )
 
     def forward(self, x, stage='common', task=None, tau=5, hard=False):
         x = self.convNode(x, stage, task, tau, hard)
+        x = self.batchNorm(x, stage, task, tau, hard)
         x = x.view(-1, 256)
         x = nn.Linear(256, 1)(x)
         return x
@@ -24,6 +28,6 @@ if __name__ == '__main__':
     x = torch.tensor(inp, dtype=torch.float)
 
     print(model(x)) # forward using basic operator
-    print(model(x, stage='mtl', task='segment_sementic')) # forward with specific task operator
+    # print(model(x, stage='mtl', task='segment_sementic')) # forward with specific task operator
 
 

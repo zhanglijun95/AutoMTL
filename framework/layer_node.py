@@ -54,7 +54,6 @@ class BN2dNode(ComputeNode):
         # Function: Generate opCommand according to different OpType
         opCommand = 'nn.BatchNorm2d(' + ','.join(torchParamList) + ')'    
         self.basicOp = eval(opCommand)
-        nn.Linear
         return
     
 class ReLUNode(ComputeNode):
