@@ -1,8 +1,13 @@
 from mtl_pytorch.base_node import BasicNode
 import torch.nn as nn
 from typing import Union
+import torch
+from framework.layer_containers import LazyLayer
+import copy
+import pydoc
 
 size_2_t = Union[int, tuple[int, int]]
+
 
 class Conv2Node(BasicNode):
     def __init__(self,
@@ -13,9 +18,9 @@ class Conv2Node(BasicNode):
                  padding: Union[size_2_t, str] = 0,
                  padding_mode: str = 'zeros',
                  dilation: Union[int, tuple] = 1,
-                 taskList = ['basic'],
-                 assumpSp = False):
-        """
+                 taskList=['basic']
+                 ):
+        __doc__ = r"""
         initialize a AutoMTL-style computation Node
 
         Args:
@@ -33,32 +38,87 @@ class Conv2Node(BasicNode):
             bias (bool, optional): If ``True``, adds a learnable bias to the
                 output. Default: ``True``
             taskList: a series of tasks that MTL want to learn
-            assumpSp: TODO: what is this for ?
         """
-        super(Conv2Node, self).__init__(taskList=taskList, assumeSp=assumpSp)
+        super(Conv2Node, self).__init__(taskList=taskList)
         self.taskSp = True  # there are specific task for a Conv2d Node.
         self.basicOp = nn.Conv2d(in_channels, out_channels,
                                  kernel_size, stride, padding,
                                  padding_mode=padding_mode, dilation=dilation)
+        self.outputDim = self.basicOp.out_channels
         self.build_layer()
 
     def build_layer(self):
         super(Conv2Node, self).build_layer()
+        self.generate_dsOp()  # need specific to conv2d node
 
-    def set_output_channels(self):
-        self.outputDim = self.basicOp.out_channels
+    def generate_dsOp(self):
+        if len(self.taskList) > 1 and self.taskSp and not self.assumeSp:
+            for task in self.taskList:
+                self.dsOp[task] = nn.ModuleList()
+                if self.basicOp.in_channels != self.basicOp.out_channels or self.basicOp.stride != (1, 1):
+                    self.dsOp[task].append(nn.Conv2d(in_channels=self.basicOp.in_channels,
+                                                     out_channels=self.basicOp.out_channels,
+                                                     kernel_size=(1, 1),
+                                                     stride=self.basicOp.stride,
+                                                     bias=False))
+                    self.dsOp[task].append(nn.BatchNorm2d(self.basicOp.out_channels))
+                self.dsOp[task].append(LazyLayer())
+        return
+
+    def generate_taskOp(self):
+        if len(self.taskList) > 1 and self.taskSp:
+            for task in self.taskList:
+                self.taskOp[task] = copy.deepcopy(self.basicOp)
+                self.policy[task] = nn.Parameter(torch.tensor([0., 0., 0.]))  # Default initialization
+        return
+
+    def compute_mtl(self, x, task, tau=5, hard=False):
+        policy_task = self.policy[task]
+        if hard is False:
+            # Policy-train
+            # possibility of each task
+            possiblity = nn.functional.gumbel_softmax(policy_task, tau=tau, hard=hard)
+            feature_common = self.compute_common(x)
+            feature_specific = self.compute_specific(x, task)
+            feature_downsample = self.compute_downsample(x, task)
+            feature = feature_common * possiblity[0] + feature_specific * possiblity[1] + feature_downsample * \
+                      possiblity[2]
+        else:
+            # Post-train or Validation
+            branch = torch.argmax(policy_task).item()
+            if branch == 0:
+                feature = self.compute_common(x)
+            elif branch == 1:
+                feature = self.compute_specific(x, task)
+            elif branch == 2:
+                feature = self.compute_downsample(x, task)
+        return feature
+
+    def compute_combined(self, x, task):
+        # Function: Forward of baiscOp, taskOp and dsOp at the same time according to different OpType and task
+        #           For weight pre-training of all operators
+        feature_list = [self.compute_common(x)]
+        if self.taskSp:
+            feature_list.append(self.compute_specific(x, task))
+            feature_list.append(self.compute_downsample(x, task))
+        return torch.mean(torch.stack(feature_list), dim=0)
+
+    def compute_downsample(self, x, task):
+        for op in self.dsOp[task]:
+            x = op(x)
+        return x
 
 
-class BN2dNode(BasicNode):
+class BN2dNode(BasicNode):  # no needed for policy
     def __init__(self,
                  num_features: int,
                  eps: float = 0.00001,
                  momentum: float = 0.1,
                  affine: bool = True,
-                 track_running_stats: bool =True ,
-                 taskList = ['basic'],
-                 assumpSp = False):
-        """
+                 track_running_stats: bool = True,
+                 taskList=['basic'],
+                 assumpSp=False):
+        __doc__ = r"""
             Construct a Batch Norm node with search space
             Args:
                 num_features: :math:`C` from an expected input of size
@@ -79,8 +139,7 @@ class BN2dNode(BasicNode):
             taskList: a series of tasks that MTL want to learn
             assumpSp:
         """
-        super(BN2dNode, self).__init__(taskList, assumpSp)
-        self.taskSp = True
+        super(BN2dNode, self).__init__(taskList)
         self.basicOp = nn.BatchNorm2d(num_features,
                                       eps, momentum,
                                       affine, track_running_stats)
@@ -89,3 +148,21 @@ class BN2dNode(BasicNode):
 
     def build_layer(self):
         super(BN2dNode, self).build_layer()
+
+    def generate_taskOp(self):
+        if len(self.taskList) > 1 and self.taskSp:
+            for task in self.taskList:
+                self.taskOp[task] = copy.deepcopy(self.basicOp)
+        return
+
+    def compute_mtl(self, x, task, tau=5, hard=False):
+        return self.compute_specific(x, task)
+
+    def compute_combined(self, x, task):
+        # Function: Forward of baiscOp, taskOp and dsOp at the same time according to different OpType and task
+        #           For weight pre-training of all operators
+        feature_list = []
+        feature_list.append(self.compute_common(x))
+        if self.taskSp:
+            feature_list.append(self.compute_specific(x, task))
+        return torch.mean(torch.stack(feature_list), dim=0)
