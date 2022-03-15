@@ -45,14 +45,24 @@ class Conv2Node(BasicNode):
                                  kernel_size, stride, padding,
                                  padding_mode=padding_mode, dilation=dilation)
         self.outputDim = self.basicOp.out_channels
+        self.policy = nn.ParameterDict()
+        self.dsOp = nn.ModuleDict()
         self.build_layer()
 
     def build_layer(self):
+        """
+            build conv2d node specific layer
+        """
         super(Conv2Node, self).build_layer()
-        self.generate_dsOp()  # need specific to conv2d node
+        self.generate_dsOp()
 
     def generate_dsOp(self):
-        if len(self.taskList) > 1 and self.taskSp and not self.assumeSp:
+        """
+
+        Returns:
+            DownSample operator, needed specific for conv2d node
+        """
+        if len(self.taskList) > 1:
             for task in self.taskList:
                 self.dsOp[task] = nn.ModuleList()
                 if self.basicOp.in_channels != self.basicOp.out_channels or self.basicOp.stride != (1, 1):
@@ -66,6 +76,11 @@ class Conv2Node(BasicNode):
         return
 
     def generate_taskOp(self):
+        """
+
+        Returns:
+            conv2d node specific task, extra policy array
+        """
         if len(self.taskList) > 1 and self.taskSp:
             for task in self.taskList:
                 self.taskOp[task] = copy.deepcopy(self.basicOp)
@@ -73,6 +88,11 @@ class Conv2Node(BasicNode):
         return
 
     def compute_mtl(self, x, task, tau=5, hard=False):
+        """
+
+        Returns:
+            output data
+        """
         policy_task = self.policy[task]
         if hard is False:
             # Policy-train
@@ -95,8 +115,12 @@ class Conv2Node(BasicNode):
         return feature
 
     def compute_combined(self, x, task):
-        # Function: Forward of baiscOp, taskOp and dsOp at the same time according to different OpType and task
-        #           For weight pre-training of all operators
+        """
+
+        Returns:
+            Forward of basicOp, taskOp and dsOp at the same time according to different OpType and task
+            For weight pre-training of all operators
+        """
         feature_list = [self.compute_common(x)]
         if self.taskSp:
             feature_list.append(self.compute_specific(x, task))
@@ -104,6 +128,11 @@ class Conv2Node(BasicNode):
         return torch.mean(torch.stack(feature_list), dim=0)
 
     def compute_downsample(self, x, task):
+        """
+
+        Returns:
+            forward for downsample
+        """
         for op in self.dsOp[task]:
             x = op(x)
         return x
@@ -116,8 +145,8 @@ class BN2dNode(BasicNode):  # no needed for policy
                  momentum: float = 0.1,
                  affine: bool = True,
                  track_running_stats: bool = True,
-                 taskList=['basic'],
-                 assumpSp=False):
+                 taskList=['basic']
+                 ):
         __doc__ = r"""
             Construct a Batch Norm node with search space
             Args:
@@ -137,7 +166,6 @@ class BN2dNode(BasicNode):  # no needed for policy
                 When these buffers are ``None``, this module always uses batch statistics.
                 in both training and eval modes. Default: ``True``
             taskList: a series of tasks that MTL want to learn
-            assumpSp:
         """
         super(BN2dNode, self).__init__(taskList)
         self.basicOp = nn.BatchNorm2d(num_features,
@@ -150,17 +178,30 @@ class BN2dNode(BasicNode):  # no needed for policy
         super(BN2dNode, self).build_layer()
 
     def generate_taskOp(self):
+        """
+
+        Returns:
+            no need for policy
+        """
         if len(self.taskList) > 1 and self.taskSp:
             for task in self.taskList:
                 self.taskOp[task] = copy.deepcopy(self.basicOp)
         return
 
     def compute_mtl(self, x, task, tau=5, hard=False):
+        """
+
+        Returns:
+            forward for mtl
+        """
         return self.compute_specific(x, task)
 
     def compute_combined(self, x, task):
-        # Function: Forward of baiscOp, taskOp and dsOp at the same time according to different OpType and task
-        #           For weight pre-training of all operators
+        """
+
+        Returns: Forward of baiscOp, taskOp and dsOp at the same time according to different OpType and task
+                 For weight pre-training of all operators
+        """
         feature_list = []
         feature_list.append(self.compute_common(x))
         if self.taskSp:

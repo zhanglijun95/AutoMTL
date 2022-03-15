@@ -18,7 +18,7 @@ class BasicNode(nn.Module):
         """
         super().__init__()
         self.taskList = taskList  # task list: task-specific operator()
-        self.taskOp = nn.ModuleDict()
+        self.taskOp = nn.ModuleDict()  # task operator, i.e a copy of basic operator
         self.basicOp = None
 
     def build_layer(self):
@@ -52,8 +52,7 @@ class BasicNode(nn.Module):
         return
 
     def forward(self, x, stage='common', task=None, tau=5, hard=False):
-        __doc__ = r"""
-
+        """
         Args:
             x: input data
             stage: the stage for training
@@ -88,6 +87,7 @@ class BasicNode(nn.Module):
 
     def compute_common(self, x):
         """
+
         Args:
             x: input data
         Returns: compute the output of basic operator
@@ -97,15 +97,20 @@ class BasicNode(nn.Module):
 
     def compute_hard_sharing(self, x):
         """
+
         Args:
             x: input data
         Returns: compute the output for hard parameter sharing training
+
         """
         return self.compute_common(x)
 
     def copy_weight_after_pretrain(self):
-        """ copy the shared operator to
+        """
+
+        Returns: copy the shared operator to
         other task-specific operator for initialization
+
         """
         if len(self.taskList) > 1 and self.taskSp:
             for task in self.taskList:
@@ -117,17 +122,27 @@ class BasicNode(nn.Module):
 
     def compute_task_weights(self, x, task):
         """
+
         Args:
             x: input data
             task: the task we want to get for result
         Returns: the weights for task we want to compute
+
         """
-        # we already
         return self.compute_specific(x, task)
 
     def compute_mtl(self, x, task, tau=5, hard=False):
-        # Function: Forward of basicOp and taskOp according to different OpType
-        #           For training in multitask model stage
+        """
+
+        Args:
+            x: input data
+            task: the current stage
+            tau:
+            hard: whether to use hard sharing
+
+        Returns:
+            output
+        """
         if self.taskSp:
             # Conv2d or BN
             if self.assumeSp:

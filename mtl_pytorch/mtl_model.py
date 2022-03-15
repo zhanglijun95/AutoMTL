@@ -3,6 +3,17 @@ import torch
 
 class mtl_model(nn.Module):
     def policy_reg(self, task, policy_idx=None, tau=5, scale=1):
+        """
+
+        Args:
+            task: current stage
+            policy_idx: index of policy
+            tau:
+            scale:
+
+        Returns:
+            regulate the policy
+        """
         reg = torch.tensor(0)
         if policy_idx is None:
             # Regularization for all policy
