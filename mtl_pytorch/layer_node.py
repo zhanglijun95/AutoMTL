@@ -9,7 +9,7 @@ import pydoc
 size_2_t = Union[int, tuple[int, int]]
 
 
-class Conv2Node(BasicNode):
+class Conv2dNode(BasicNode):
     def __init__(self,
                  in_channels: int,
                  out_channels: int,
@@ -18,6 +18,8 @@ class Conv2Node(BasicNode):
                  padding: Union[size_2_t, str] = 0,
                  padding_mode: str = 'zeros',
                  dilation: Union[int, tuple] = 1,
+                 bias: bool = False,
+                 groups: int = 1,
                  taskList=['basic']
                  ):
         __doc__ = r"""
@@ -39,11 +41,12 @@ class Conv2Node(BasicNode):
                 output. Default: ``True``
             taskList: a series of tasks that MTL want to learn
         """
-        super(Conv2Node, self).__init__(taskList=taskList)
+        super(Conv2dNode, self).__init__(taskList=taskList)
         self.taskSp = True  # there are specific task for a Conv2d Node.
         self.basicOp = nn.Conv2d(in_channels, out_channels,
                                  kernel_size, stride, padding,
-                                 padding_mode=padding_mode, dilation=dilation)
+                                 padding_mode=padding_mode, dilation=dilation,
+                                 bias=bias, groups=groups)
         self.outputDim = self.basicOp.out_channels
         self.policy = nn.ParameterDict()
         self.dsOp = nn.ModuleDict()
@@ -53,7 +56,7 @@ class Conv2Node(BasicNode):
         """
             build conv2d node specific layer
         """
-        super(Conv2Node, self).build_layer()
+        super(Conv2dNode, self).build_layer()
         self.generate_dsOp()
 
     def generate_dsOp(self):

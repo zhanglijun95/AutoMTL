@@ -1,12 +1,13 @@
 import torch
 import torch.nn as nn
 from mtl_pytorch import layer_node
+from mtl_pytorch.mtl_model import mtl_model
 import numpy as np
 
-class MTL_network(nn.Module):
+class MTL_network(mtl_model):
     def __init__(self):
         super(MTL_network, self).__init__()
-        self.convNode = layer_node.Conv2Node(
+        self.convNode = layer_node.Conv2dNode(
             in_channels=1, out_channels=128, kernel_size=3,
             taskList=['segment_sementic', 'depth_zbuffer'])
         self.batchNorm = layer_node.BN2dNode(

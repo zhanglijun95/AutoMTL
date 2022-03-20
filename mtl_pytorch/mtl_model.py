@@ -2,6 +2,11 @@ import torch.nn as nn
 import torch
 
 class mtl_model(nn.Module):
+
+    def __init__(self):
+        super().__init__()
+
+
     def policy_reg(self, task, policy_idx=None, tau=5, scale=1):
         """
 
