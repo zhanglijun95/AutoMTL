@@ -81,7 +81,7 @@ class InvertedResidual(nn.Module):
                 mtl.BN2dNode(oup),
             )
 
-    def forward(self, x):
+    def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
         if self.identity:
             return x + self.conv(x)
         else:
@@ -122,7 +122,7 @@ class MobileNetV2(nn.Module):
 
         self._initialize_weights()
 
-    def forward(self, x):
+    def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
         x = self.features(x)
         x = self.conv(x)
         x = self.avgpool(x)
@@ -133,13 +133,13 @@ class MobileNetV2(nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, mtl.Conv2dNode):
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-                if m.bias is not None:
-                    m.bias.data.zero_()
+                n = m.basicOp.kernel_size[0] * m.basicOp.kernel_size[1] * m.basicOp.out_channels
+                m.basicOp.weight.data.normal_(0, math.sqrt(2. / n))
+                if m.basicOp.bias is not None:
+                    m.basicOp.bias.data.zero_()
             elif isinstance(m, mtl.BN2dNode):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                m.basicOp.weight.data.fill_(1)
+                m.basicOp.bias.data.zero_()
             elif isinstance(m, nn.Linear):
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
