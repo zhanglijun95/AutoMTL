@@ -32,19 +32,23 @@ def _make_divisible(v, divisor, min_value=None):
     return new_v
 
 
-def conv_3x3_bn(inp, oup, stride):
-    return nn.Sequential(
-        mtl.Conv2dNode(inp, oup, 3, stride, 1, bias=False),
-        mtl.BN2dNode(oup),
-        nn.ReLU6(inplace=True)
+def conv_3x3_bn(inp, oup, stride): # missing taskList
+    return mtl.Sequential(
+        nn.Sequential(
+            mtl.Conv2dNode(inp, oup, 3, stride, 1, bias=False),
+            mtl.BN2dNode(oup),
+            nn.ReLU6(inplace=True)
+        )
     )
 
 
 def conv_1x1_bn(inp, oup):
-    return nn.Sequential(
-        mtl.Conv2dNode(inp, oup, 1, 1, 0, bias=False),
-        mtl.BN2dNode(oup),
-        nn.ReLU6(inplace=True)
+    return mtl.Sequential(
+        nn.Sequential(
+            mtl.Conv2dNode(inp, oup, 1, 1, 0, bias=False),
+            mtl.BN2dNode(oup),
+            nn.ReLU6(inplace=True)
+        )
     )
 
 
@@ -57,28 +61,32 @@ class InvertedResidual(nn.Module):
         self.identity = stride == 1 and inp == oup
 
         if expand_ratio == 1:
-            self.conv = nn.Sequential(
-                # dw
-                mtl.Conv2dNode(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
-                mtl.BN2dNode(hidden_dim),
-                nn.ReLU6(inplace=True),
-                # pw-linear
-                mtl.Conv2dNode(hidden_dim, oup, 1, 1, 0, bias=False),
-                mtl.BN2dNode(oup),
+            self.conv = mtl.Sequential(
+                nn.Sequential(
+                    # dw
+                    mtl.Conv2dNode(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                    mtl.BN2dNode(hidden_dim),
+                    nn.ReLU6(inplace=True),
+                    # pw-linear
+                    mtl.Conv2dNode(hidden_dim, oup, 1, 1, 0, bias=False),
+                    mtl.BN2dNode(oup),
+                )
             )
         else:
-            self.conv = nn.Sequential(
-                # pw
-                mtl.Conv2dNode(inp, hidden_dim, 1, 1, 0, bias=False),
-                mtl.BN2dNode(hidden_dim),
-                nn.ReLU6(inplace=True),
-                # dw
-                mtl.Conv2dNode(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
-                mtl.BN2dNode(hidden_dim),
-                nn.ReLU6(inplace=True),
-                # pw-linear
-                mtl.Conv2dNode(hidden_dim, oup, 1, 1, 0, bias=False),
-                mtl.BN2dNode(oup),
+            self.conv = mtl.Sequential(
+                nn.Sequential(
+                    # pw
+                    mtl.Conv2dNode(inp, hidden_dim, 1, 1, 0, bias=False),
+                    mtl.BN2dNode(hidden_dim),
+                    nn.ReLU6(inplace=True),
+                    # dw
+                    mtl.Conv2dNode(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                    mtl.BN2dNode(hidden_dim),
+                    nn.ReLU6(inplace=True),
+                    # pw-linear
+                    mtl.Conv2dNode(hidden_dim, oup, 1, 1, 0, bias=False),
+                    mtl.BN2dNode(oup),
+                )
             )
 
     def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
@@ -89,7 +97,9 @@ class InvertedResidual(nn.Module):
 
 
 class MobileNetV2(nn.Module):
-    def __init__(self, num_classes=1000, width_mult=1.):
+    def __init__(self, num_classes=1000,
+                 width_mult=1.,
+                 heads_dict={'basic': None}):
         super(MobileNetV2, self).__init__()
         # setting of inverted residual blocks
         self.cfgs = [
@@ -113,7 +123,7 @@ class MobileNetV2(nn.Module):
             for i in range(n):
                 layers.append(block(input_channel, output_channel, s if i == 0 else 1, t))
                 input_channel = output_channel
-        self.features = nn.Sequential(*layers)
+        self.features = mtl.Sequential(nn.Sequential(*layers)) # TODO: nn.sequential wrapper
         # building last several layers
         output_channel = _make_divisible(1280 * width_mult, 4 if width_mult == 0.1 else 8) if width_mult > 1.0 else 1280
         self.conv = conv_1x1_bn(input_channel, output_channel)
@@ -122,9 +132,10 @@ class MobileNetV2(nn.Module):
 
         self._initialize_weights()
 
-    def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
-        x = self.features(x)
-        x = self.conv(x)
+    def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
+        # TODO: debug normal forwarding
+        x = self.features(x, stage, task, tau, hard, policy_idx)
+        x = self.conv(x, stage, task, tau, hard, policy_idx)
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.classifier(x)

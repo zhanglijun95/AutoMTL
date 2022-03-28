@@ -1,6 +1,12 @@
+import operator
+from collections import OrderedDict
+from itertools import islice
+
+from torch._jit_internal import _copy_to_script_wrapper
+
 from mtl_pytorch.base_node import BasicNode
 import torch.nn as nn
-from typing import Union
+from typing import Union, Iterator
 import torch
 from framework.layer_containers import LazyLayer
 import copy
@@ -210,3 +216,23 @@ class BN2dNode(BasicNode):  # no needed for policy
         if self.taskSp:
             feature_list.append(self.compute_specific(x, task))
         return torch.mean(torch.stack(feature_list), dim=0)
+
+
+class Sequential(nn.Module):
+
+    def __init__(self, seq: nn.Sequential):
+        """
+            wrapper for nn.Sequential in order to apply MTL forwarding
+        Args:
+            seq: actual sequence of layers,
+        """
+        super(Sequential, self).__init__()
+        self.models = seq
+
+    def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
+        for model in self.models: # apply MTL forwarding when necessary
+            if isinstance(model, Conv2dNode) or isinstance(model, BN2dNode):
+                x = model(x, stage, task, tau, hard)
+            else:
+                x = model(x)
+        return x

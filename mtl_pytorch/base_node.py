@@ -74,7 +74,7 @@ class BasicNode(nn.Module):
                 sys.exit('Please enter the specified task for stage==' + stage)
         elif stage == 'combined' or stage == 'pre_train_all':
             if task is not None:
-                return self.compute_combined(task)
+                return self.compute_combined(x, task)
             else:
                 sys.exit('Please enter the specified task for stage==' + stage)
         elif stage == 'mtl':
