@@ -26,7 +26,7 @@ class Conv2dNode(BasicNode):
                  dilation: Union[int, tuple] = 1,
                  bias: bool = False,
                  groups: int = 1,
-                 taskList=['basic']
+                 taskList = ['basic']
                  ):
         __doc__ = r"""
         initialize a AutoMTL-style computation Node
@@ -90,7 +90,7 @@ class Conv2dNode(BasicNode):
         Returns:
             conv2d node specific task, extra policy array
         """
-        if len(self.taskList) > 1 and self.taskSp:
+        if len(self.taskList) > 1:
             for task in self.taskList:
                 self.taskOp[task] = copy.deepcopy(self.basicOp)
                 self.policy[task] = nn.Parameter(torch.tensor([0., 0., 0.]))  # Default initialization
@@ -192,7 +192,7 @@ class BN2dNode(BasicNode):  # no needed for policy
         Returns:
             no need for policy
         """
-        if len(self.taskList) > 1 and self.taskSp:
+        if len(self.taskList) > 1:
             for task in self.taskList:
                 self.taskOp[task] = copy.deepcopy(self.basicOp)
         return

@@ -297,6 +297,7 @@ class Trainer():
 
             optimizer.zero_grad()
             output = self.model(x, stage, task, tau, hard, policy_idx)
+            print(output)
             if 'mask' in data:
                 loss = self.criterion_dict[task](output, y, data['mask'])
             else:

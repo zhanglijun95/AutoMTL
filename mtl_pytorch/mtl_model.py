@@ -1,11 +1,29 @@
 import torch.nn as nn
 import torch
+from mtl_pytorch.layer_node import Conv2dNode, BN2dNode
+from mobilenetv2 import mobilenet_v2, MobileNetV2
+from copy import deepcopy
 
 class mtl_model(nn.Module):
 
     def __init__(self):
         super().__init__()
 
+
+    def embed_nas(self, model : MobileNetV2, taskList):
+        for name, module in deepcopy(model).named_modules():
+            if isinstance(module, nn.Conv2d):
+                model.__setattr__(name, Conv2dNode(module.in_channels, module.out_channels,
+                           module.kernel_size, module.stride,
+                           module.padding, module.padding_mode,
+                           module.dilation, module.bias,
+                           module.groups, taskList=taskList))
+
+            if isinstance(module, nn.BatchNorm2d):
+                model.__setattr__(name, BN2dNode(module.num_features, module.eps, module.momentum,
+                                  module.affine, module.track_running_stats,
+                                  taskList))
+        return model
 
     def policy_reg(self, task, policy_idx=None, tau=5, scale=1):
         """
