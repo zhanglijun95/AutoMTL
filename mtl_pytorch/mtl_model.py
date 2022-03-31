@@ -1,7 +1,6 @@
 import torch.nn as nn
 import torch
 from mtl_pytorch.layer_node import Conv2dNode, BN2dNode
-from mobilenetv2 import mobilenet_v2, MobileNetV2
 from copy import deepcopy
 
 class mtl_model(nn.Module):
@@ -10,20 +9,41 @@ class mtl_model(nn.Module):
         super().__init__()
 
 
-    def embed_nas(self, model : MobileNetV2, taskList):
+    def embed_nas(self, model):
+        taskList = list(model.headsDict.keys())
         for name, module in deepcopy(model).named_modules():
             if isinstance(module, nn.Conv2d):
                 model.__setattr__(name, Conv2dNode(module.in_channels, module.out_channels,
                            module.kernel_size, module.stride,
                            module.padding, module.padding_mode,
-                           module.dilation, module.bias,
-                           module.groups, taskList=taskList))
+                           module.dilation, bias=module.bias,
+                           groups=module.groups, taskList=taskList))
 
             if isinstance(module, nn.BatchNorm2d):
                 model.__setattr__(name, BN2dNode(module.num_features, module.eps, module.momentum,
                                   module.affine, module.track_running_stats,
                                   taskList))
         return model
+
+    def share_bottom_policy(self, share_num):
+        count = 0
+        for node in self.modules():
+            if isinstance(node, Conv2dNode):
+                if count == share_num:
+                    break
+                else:
+                    count += 1
+                    for task in self.taskList:
+                        node.policy[task] = nn.Parameter(torch.tensor([1., 0., 0.]))
+                        node.policy[task].requires_grad = False
+        return
+
+    def max_node_depth(self):
+        max_depth = 0
+        for x in self.children():
+            if isinstance(x, Conv2dNode):
+                max_depth = max(x.depth, max_depth)
+        return max_depth
 
     def policy_reg(self, task, policy_idx=None, tau=5, scale=1):
         """
@@ -40,8 +60,9 @@ class mtl_model(nn.Module):
         reg = torch.tensor(0)
         if policy_idx is None:
             # Regularization for all policy
-            for node in self.children():
-                if node.taskSp and not node.assumeSp:
+            for node in self.modules():
+                if isinstance(node, Conv2dNode):
+                    print(node)
                     policy_task = node.policy[task]
                     # gumbel_softmax make sure that we randomly pick each path while training
                     # e.g. if there is a 0.1 chance that our policy choose basic operator,

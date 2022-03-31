@@ -48,6 +48,11 @@ class Conv2dNode(BasicNode):
             taskList: a series of tasks that MTL want to learn
         """
         super(Conv2dNode, self).__init__(taskList=taskList)
+        if not isinstance(bias, bool):
+            if bias is not None:
+                bias = True
+            else:
+                bias = False
         self.taskSp = True  # there are specific task for a Conv2d Node.
         self.basicOp = nn.Conv2d(in_channels, out_channels,
                                  kernel_size, stride, padding,
