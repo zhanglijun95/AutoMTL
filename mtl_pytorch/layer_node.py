@@ -26,7 +26,7 @@ class Conv2dNode(BasicNode):
                  dilation: Union[int, tuple] = 1,
                  bias: bool = False,
                  groups: int = 1,
-                 taskList = ['basic']
+                 task_list = ['basic']
                  ):
         __doc__ = r"""
         initialize a AutoMTL-style computation Node
@@ -47,7 +47,7 @@ class Conv2dNode(BasicNode):
                 output. Default: ``True``
             taskList: a series of tasks that MTL want to learn
         """
-        super(Conv2dNode, self).__init__(taskList=taskList)
+        super(Conv2dNode, self).__init__(taskList=task_list)
         if not isinstance(bias, bool):
             if bias is not None:
                 bias = True
@@ -58,6 +58,9 @@ class Conv2dNode(BasicNode):
                                  kernel_size, stride, padding,
                                  padding_mode=padding_mode, dilation=dilation,
                                  bias=bias, groups=groups)
+        self.bias = self.basicOp.bias
+        self.weight = self.basicOp.weight
+
         self.outputDim = self.basicOp.out_channels
         self.policy = nn.ParameterDict()
         self.dsOp = nn.ModuleDict()
@@ -159,7 +162,7 @@ class BN2dNode(BasicNode):  # no needed for policy
                  momentum: float = 0.1,
                  affine: bool = True,
                  track_running_stats: bool = True,
-                 taskList=['basic']
+                 task_list=['basic']
                  ):
         __doc__ = r"""
             Construct a Batch Norm node with search space
@@ -181,12 +184,14 @@ class BN2dNode(BasicNode):  # no needed for policy
                 in both training and eval modes. Default: ``True``
             taskList: a series of tasks that MTL want to learn
         """
-        super(BN2dNode, self).__init__(taskList)
+        super(BN2dNode, self).__init__(task_list)
         self.basicOp = nn.BatchNorm2d(num_features,
                                       eps, momentum,
                                       affine, track_running_stats)
         self.inputDim = num_features
         self.build_layer()
+        self.weight = self.basicOp.weight
+        self.bias = self.basicOp.bias
 
     def build_layer(self):
         super(BN2dNode, self).build_layer()
@@ -235,9 +240,9 @@ class Sequential(nn.Module):
         self.models = seq
 
     def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
-        for model in self.models: # apply MTL forwarding when necessary
-            if isinstance(model, Conv2dNode) or isinstance(model, BN2dNode):
-                x = model(x, stage, task, tau, hard)
+        for node in self.models: # apply MTL forwarding when necessary
+            if isinstance(node, Conv2dNode) or isinstance(node, BN2dNode):
+                x = node(x, stage, task, tau, hard)
             else:
-                x = model(x)
+                x = node(x)
         return x

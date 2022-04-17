@@ -3,59 +3,54 @@ import warnings
 import torch.nn as nn
 import torch
 from mtl_pytorch.layer_node import Conv2dNode, BN2dNode
+from mtl_pytorch.base_node import BasicNode
 from copy import deepcopy
 
 class mtl_model(nn.Module):
 
-    def __init__(self, model: nn.Module, headsDict={'basic': None}):
+    def __init__(self):
         """
-
-        Args:
-            model: the native pytorch model
-        Returns
-            Turn model into a mtl_model, and change internal structure as necessary
+            compute depth for apply policy regularization
         """
         super(mtl_model, self).__init__()
 
-        self.headsDict = headsDict
-        self.taskList = list(self.headsDict.keys())
-
-        # Step 1: change every Conv2d Node into Conv2dNode to enable NAS
-        self.model = self.embed_nas(model)
-
-        # Step 2: compute the depth for each node, as it's needed for alter_train
+        # simply compute the
         self.compute_depth()
 
     def compute_depth(self):
         """
-            compute the depth for each Conv2dNode
+            compute the depth for each Basic node
         """
-        pass
+        cur_dep = 0
+        for module in self.model.modules():
+            if isinstance(module, BasicNode):
+                module.depth = cur_dep
+                cur_dep += 1
 
     def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
         feature = self.model(x, stage, task, tau, hard, policy_idx)
 
         if task != None:
-            output = self.headsDict[task](feature)
+            output = self.headsDict[task](feature) # use our own classifier
             return output
         else:
             warnings.warn('No task specified. Return feature.')
             return feature
 
+    # deprecated
     def embed_nas(self, model):
         for name, module in deepcopy(model).named_modules():
             print(module)
             if isinstance(module, nn.Conv2d):
                 model.__setattr__(name, Conv2dNode(module.in_channels, module.out_channels,
-                           module.kernel_size, module.stride,
-                           module.padding, module.padding_mode,
-                           module.dilation, bias=module.bias,
-                           groups=module.groups, taskList=self.taskList))
+                                                   module.kernel_size, module.stride,
+                                                   module.padding, module.padding_mode,
+                                                   module.dilation, bias=module.bias,
+                                                   groups=module.groups, task_list=self.taskList))
             if isinstance(module, nn.BatchNorm2d):
                 model.__setattr__(name, BN2dNode(module.num_features, module.eps, module.momentum,
                                   module.affine, module.track_running_stats,
                                   self.taskList))
-            self.embed_nas(model)
         return model
 
     def share_bottom_policy(self, share_num):
@@ -73,7 +68,7 @@ class mtl_model(nn.Module):
 
     def max_node_depth(self):
         max_depth = 0
-        for x in self.children():
+        for x in self.modules():
             if isinstance(x, Conv2dNode):
                 max_depth = max(x.depth, max_depth)
         return max_depth

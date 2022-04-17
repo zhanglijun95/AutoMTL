@@ -9,7 +9,7 @@ class MTL_network(mtl_model):
         super(MTL_network, self).__init__()
         self.convNode = layer_node.Conv2dNode(
             in_channels=1, out_channels=128, kernel_size=3,
-            taskList=['segment_sementic', 'depth_zbuffer'])
+            task_list=['segment_sementic', 'depth_zbuffer'])
         self.batchNorm = layer_node.BN2dNode(
             num_features=128
         )
