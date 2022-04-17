@@ -7,6 +7,7 @@ import torch
 from mtl_model import mtl_model
 from layer_node import Sequential, Conv2dNode, BN2dNode
 
+
 def conv_bn(inp, oup, stride, task_list):
     return Sequential(
         nn.Sequential(
@@ -46,9 +47,9 @@ class InvertedResidual(nn.Module):
         if expand_ratio == 1:
             self.conv = Sequential(
                 nn.Sequential(
-                # dw
+                    # dw
                     Conv2dNode(hidden_dim, hidden_dim, 3, stride, 1,
-                              groups=hidden_dim, bias=False, task_list=task_list),
+                               groups=hidden_dim, bias=False, task_list=task_list),
                     BN2dNode(hidden_dim, task_list=task_list),
                     nn.ReLU6(inplace=True),
                     # pw-linear
@@ -59,7 +60,7 @@ class InvertedResidual(nn.Module):
         else:
             self.conv = Sequential(
                 nn.Sequential(
-                # pw
+                    # pw
                     Conv2dNode(inp, hidden_dim, 1, 1, 0, bias=False, task_list=task_list),
                     BN2dNode(hidden_dim, task_list=task_list),
                     nn.ReLU6(inplace=True),
@@ -82,9 +83,11 @@ class InvertedResidual(nn.Module):
             return self.conv(x, stage, task, tau, hard, policy_idx)
 
 
+# inherit in order to use trainer provided
 class MobileNetV2(mtl_model):
     def __init__(self, n_class=1000, input_size=224, width_mult=1., heads_dict={}):
         super(MobileNetV2, self).__init__()
+
         block = InvertedResidual
         input_channel = 32
         last_channel = 1280
@@ -122,8 +125,8 @@ class MobileNetV2(mtl_model):
         # make it nn.Sequential
         self.features = Sequential(nn.Sequential(*self.features))
 
-        # building classifier
-        self.classifier = nn.Linear(self.last_channel, n_class)
+        # building classifier (leave classification work to heads_dict)
+        # self.classifier = nn.Linear(self.last_channel, n_class)
 
         self._initialize_weights()
 
@@ -171,8 +174,3 @@ def mobilenet_v2(pretrained=True, heads_dict={}):
 
 if __name__ == '__main__':
     net = mobilenet_v2(True)
-
-
-
-
-

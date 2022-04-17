@@ -60,6 +60,8 @@ class Conv2dNode(BasicNode):
                                  bias=bias, groups=groups)
         self.bias = self.basicOp.bias
         self.weight = self.basicOp.weight
+        self.kernel_size = self.basicOp.kernel_size
+        self.out_channels = self.basicOp.out_channels
 
         self.outputDim = self.basicOp.out_channels
         self.policy = nn.ParameterDict()

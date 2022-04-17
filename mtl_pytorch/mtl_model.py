@@ -22,36 +22,10 @@ class mtl_model(nn.Module):
             compute the depth for each Basic node
         """
         cur_dep = 0
-        for module in self.model.modules():
+        for module in self.modules():
             if isinstance(module, BasicNode):
                 module.depth = cur_dep
                 cur_dep += 1
-
-    def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
-        feature = self.model(x, stage, task, tau, hard, policy_idx)
-
-        if task != None:
-            output = self.headsDict[task](feature) # use our own classifier
-            return output
-        else:
-            warnings.warn('No task specified. Return feature.')
-            return feature
-
-    # deprecated
-    def embed_nas(self, model):
-        for name, module in deepcopy(model).named_modules():
-            print(module)
-            if isinstance(module, nn.Conv2d):
-                model.__setattr__(name, Conv2dNode(module.in_channels, module.out_channels,
-                                                   module.kernel_size, module.stride,
-                                                   module.padding, module.padding_mode,
-                                                   module.dilation, bias=module.bias,
-                                                   groups=module.groups, task_list=self.taskList))
-            if isinstance(module, nn.BatchNorm2d):
-                model.__setattr__(name, BN2dNode(module.num_features, module.eps, module.momentum,
-                                  module.affine, module.track_running_stats,
-                                  self.taskList))
-        return model
 
     def share_bottom_policy(self, share_num):
         count = 0
