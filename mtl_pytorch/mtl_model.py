@@ -1,3 +1,5 @@
+import warnings
+
 import torch.nn as nn
 import torch
 from mtl_pytorch.layer_node import Conv2dNode, BN2dNode
@@ -5,24 +7,55 @@ from copy import deepcopy
 
 class mtl_model(nn.Module):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, model: nn.Module, headsDict={'basic': None}):
+        """
 
+        Args:
+            model: the native pytorch model
+        Returns
+            Turn model into a mtl_model, and change internal structure as necessary
+        """
+        super(mtl_model, self).__init__()
+
+        self.headsDict = headsDict
+        self.taskList = list(self.headsDict.keys())
+
+        # Step 1: change every Conv2d Node into Conv2dNode to enable NAS
+        self.model = self.embed_nas(model)
+
+        # Step 2: compute the depth for each node, as it's needed for alter_train
+        self.compute_depth()
+
+    def compute_depth(self):
+        """
+            compute the depth for each Conv2dNode
+        """
+        pass
+
+    def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
+        feature = self.model(x, stage, task, tau, hard, policy_idx)
+
+        if task != None:
+            output = self.headsDict[task](feature)
+            return output
+        else:
+            warnings.warn('No task specified. Return feature.')
+            return feature
 
     def embed_nas(self, model):
-        taskList = list(model.headsDict.keys())
         for name, module in deepcopy(model).named_modules():
+            print(module)
             if isinstance(module, nn.Conv2d):
                 model.__setattr__(name, Conv2dNode(module.in_channels, module.out_channels,
                            module.kernel_size, module.stride,
                            module.padding, module.padding_mode,
                            module.dilation, bias=module.bias,
-                           groups=module.groups, taskList=taskList))
-
+                           groups=module.groups, taskList=self.taskList))
             if isinstance(module, nn.BatchNorm2d):
                 model.__setattr__(name, BN2dNode(module.num_features, module.eps, module.momentum,
                                   module.affine, module.track_running_stats,
-                                  taskList))
+                                  self.taskList))
+            self.embed_nas(model)
         return model
 
     def share_bottom_policy(self, share_num):

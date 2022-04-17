@@ -20,6 +20,7 @@ class BasicNode(nn.Module):
         self.taskList = taskList  # task list: task-specific operator()
         self.taskOp = nn.ModuleDict()  # task operator, i.e a copy of basic operator
         self.basicOp = None
+        self.depth = 0
 
     def build_layer(self):
         """
