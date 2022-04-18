@@ -113,7 +113,6 @@ class Conv2dNode(BasicNode):
             output data
         """
         policy_task = self.policy[task]
-        print(self.policy)
         if hard is False:
             # Policy-train
             # possibility of each task
@@ -243,11 +242,9 @@ class Sequential(nn.Module):
 
     def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
         for node in self.models: # apply MTL forwarding when necessary
-
             if isinstance(node, Conv2dNode) or \
                     isinstance(node, BN2dNode) or \
                     isinstance(node, Sequential):
-                print(node)
                 x = node(x, stage, task, tau, hard)
             else:
                 x = node(x)
