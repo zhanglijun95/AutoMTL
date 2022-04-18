@@ -130,8 +130,11 @@ class MobileNetV2(mtl_model):
 
         self._initialize_weights()
 
-    def forward(self, x, stage='mtl', task=None, tau=5, hard=False, policy_idx=None):
+        self.compute_depth()
+
+    def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
         # Step 1: get feature from backbone model
+        print('before forwarding', stage)
         feature = self.features(x, stage, task, tau, hard, policy_idx)
 
         # Step 2: Add heads for each task

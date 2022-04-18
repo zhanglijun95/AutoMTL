@@ -14,8 +14,7 @@ class mtl_model(nn.Module):
         """
         super(mtl_model, self).__init__()
 
-        # simply compute the
-        self.compute_depth()
+        # simply compute the depth for every node
 
     def compute_depth(self):
         """
@@ -43,7 +42,7 @@ class mtl_model(nn.Module):
     def max_node_depth(self):
         max_depth = 0
         for x in self.modules():
-            if isinstance(x, Conv2dNode):
+            if isinstance(x, BasicNode):
                 max_depth = max(x.depth, max_depth)
         return max_depth
 

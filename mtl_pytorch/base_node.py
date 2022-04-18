@@ -21,6 +21,7 @@ class BasicNode(nn.Module):
         self.taskOp = nn.ModuleDict()  # task operator, i.e a copy of basic operator
         self.basicOp = None
         self.depth = 0
+        self.policy = nn.ParameterDict()
 
     def build_layer(self):
         """

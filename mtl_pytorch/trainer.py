@@ -46,6 +46,7 @@ class Trainer():
         
         for i in range(start, iters):
             # Pre-train all weights
+            print(i)
             if task_iters is None:
                 self.train_step('pre_train_all', optimizer)
             else:
@@ -296,6 +297,7 @@ class Trainer():
             y = data['label']
 
             optimizer.zero_grad()
+            print(task)
             output = self.model(x, stage, task, tau, hard, policy_idx)
 
             if 'mask' in data:
@@ -336,6 +338,7 @@ class Trainer():
 
             optimizer.zero_grad()
             output = self.model(x, stage, task, tau, hard, policy_idx)
+
             if 'mask' in data:
                 tloss = self.criterion_dict[task](output, y, data['mask'])
             else:
