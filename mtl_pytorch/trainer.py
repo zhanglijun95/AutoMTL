@@ -46,7 +46,6 @@ class Trainer():
         
         for i in range(start, iters):
             # Pre-train all weights
-            print(i)
             if task_iters is None:
                 self.train_step('pre_train_all', optimizer)
             else:

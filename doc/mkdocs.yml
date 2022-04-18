@@ -1,0 +1,8 @@
+site_name: AutoMTL
+theme: readthedocs
+nav:
+  - Home: index.md
+  - Example:
+      - mobilenetv2.md
+  - Documentation:
+      - layer_node.md
