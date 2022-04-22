@@ -4,7 +4,7 @@ import argparse
 import warnings
 from pathlib import Path
 warnings.simplefilter(action='ignore', category=FutureWarning)
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from collections import OrderedDict
 from scipy.special import softmax
 from mobilenetv2 import mobilenet_v2

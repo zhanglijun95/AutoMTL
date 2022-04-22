@@ -148,16 +148,16 @@ class MobileNetV2(mtl_model):
         for m in self.modules():
             if isinstance(m, Conv2dNode):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
+                m.weight.data.normal_(0, math.sqrt(2. / n)).cuda()
                 if m.bias is not None:
-                    m.bias.data.zero_()
+                    m.bias.data.zero_().cuda()
             elif isinstance(m, BN2dNode):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                m.weight.data.fill_(1).cuda()
+                m.bias.data.zero_().cuda()
             elif isinstance(m, nn.Linear):
-                n = m.weight.size(1)
-                m.weight.data.normal_(0, 0.01)
-                m.bias.data.zero_()
+                n = m.weight.size(1).cuda()
+                m.weight.data.normal_(0, 0.01).cuda()
+                m.bias.data.zero_().cuda()
 
 
 def mobilenet_v2(pretrained=True, heads_dict={}):

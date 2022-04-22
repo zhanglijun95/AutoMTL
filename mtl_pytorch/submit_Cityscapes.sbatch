@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=CityScapes_test
 #SBATCH -N1                          # Ensure that all cores are on one machine
-#SBATCH --partition=m40-long             # Partition to submit to (serial_requeue)
+#SBATCH --partition=rtx8000-long            # Partition to submit to (serial_requeue)
 #SBATCH --exclude=node007
-#SBATCH --mem=4096               # Memory pool for all cores (see also --mem-per-cpu)
-#SBATCH --output=exp/exp_output/run_logs_%j.out            # File to which STDOUT will be written
-#SBATCH --error=exp/exp_output/run_logs_%j.err            # File to which STDERR will be written
+#SBATCH --mem=10240              # Memory pool for all cores (see also --mem-per-cpu)
+#SBATCH --output=exp/run_logs_%j.out            # File to which STDOUT will be written
+#SBATCH --error=exp/run_logs_%j.err            # File to which STDERR will be written
 #SBATCH --gres=gpu:1
 ####efefSBATCH --cpus-per-task=4
 #SBATCH --time=7-00:00:00
@@ -35,12 +35,11 @@ unset __conda_setup
 
 conda init bash
 conda activate multitask
+echo "activate"
 sleep 1
 
 # 
-python experiments_sample.py --seed=60 --sample_dir='sample_wo_reg/' \ 
---ckpt_dir='checkpoint/Cityscapes/' --reload_ckpt='alter_train_20000iter.model' \ 
---task_iters 100 100 
+python example_mobilenetv2.py
 
 sleep 1
 exit

@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import torch
 import torch.nn as nn
-from torch.utils.tensorboard import SummaryWriter
+# from torch.utils.tensorboard import SummaryWriter
 
 
 class Trainer():
@@ -257,7 +257,7 @@ class Trainer():
                 optimizer.load_state_dict(state['optimizer'])
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=decay_lr_freq, gamma=decay_lr_rate)
 
-        for i in range(start, iters):
+        for i in tqdm(range(start, iters)):
             # Step 2: Train the network with policy
             if task_iters is None:
                 self.train_step('mtl', optimizer, scheduler, hard=True, loss_lambda=loss_lambda)

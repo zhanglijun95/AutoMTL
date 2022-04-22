@@ -4,15 +4,15 @@ from itertools import islice
 
 from torch._jit_internal import _copy_to_script_wrapper
 
-from mtl_pytorch.base_node import BasicNode
+from base_node import BasicNode
 import torch.nn as nn
-from typing import Union, Iterator
+from typing import Tuple, Union, Iterator
 import torch
 from framework.layer_containers import LazyLayer
 import copy
 import pydoc
 
-size_2_t = Union[int, tuple[int, int]]
+size_2_t = Union[int, Tuple[int, int]]
 
 
 class Conv2dNode(BasicNode):
