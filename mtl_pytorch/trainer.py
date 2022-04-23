@@ -61,6 +61,7 @@ class Trainer():
                 self.validate('pre_train_all', i, writer=writer)
                 self.model.train()
             if (i+1) % self.save_iters == 0:
+                print(savePath)
                 if savePath is not None:
                     state = {'iter': i,
                             'state_dict': self.model.state_dict(),
@@ -123,6 +124,7 @@ class Trainer():
                 
             # Step 6: Save model
             if (i+1) % self.save_iters == 0:
+                print(savePath)
                 if savePath is not None:
                     state = {'iter': i,
                             'state_dict': self.model.state_dict(),
@@ -271,6 +273,7 @@ class Trainer():
                 self.validate('mtl', i, hard=True, writer=writer)
                 self.model.train()
             if (i+1) % self.save_iters == 0:
+                print(savePath)
                 if savePath is not None:
                     state = {'iter': i,
                             'state_dict': self.model.state_dict(),

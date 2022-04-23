@@ -67,12 +67,12 @@ trainer = Trainer(mtlmodel, trainDataloaderDict, valDataloaderDict, criterionDic
 
 print("start pre train")
 # iters = 10000
-trainer.pre_train(iters=1, lr=0.0001, savePath=checkpoint+'Cityscapes/')
+trainer.pre_train(iters=10000, lr=0.0001, savePath=checkpoint+'Cityscapes/')
 
 loss_lambda = {'segment_semantic': 1, 'depth_zbuffer': 1, 'policy':0.0005}
 print("start alter train")
 # iters = 20000
-trainer.alter_train_with_reg(iters=1, policy_network_iters=(100,400), policy_lr=0.01, network_lr=0.0001,
+trainer.alter_train_with_reg(iters=20000, policy_network_iters=(100,400), policy_lr=0.01, network_lr=0.0001,
                              loss_lambda=loss_lambda,
                              savePath=checkpoint+'Cityscapes/')
 
@@ -106,7 +106,7 @@ for task in tasks:
         elif choice == 2:
             sample_policy_dict[name] = torch.tensor([0.0,0.0,1.0]).cuda()
 
-sample_path = 'checkpoint/CityScapes/'
+sample_path = 'checkpoint/Cityscapes/'
 # app.run(debug=True, use_reloader=False)
 sample_state = {'state_dict': sample_policy_dict}
 torch.save(sample_state, sample_path + 'sample_policy.model')
@@ -118,10 +118,10 @@ while not os.path.exists(sample_path + 'sample_policy.model'):
 loss_lambda = {'segment_semantic': 1, 'depth_zbuffer': 1}
 # iters = 20000
 print('start post_train')
-trainer.post_train(iters=10, lr=0.001,
+trainer.post_train(iters=20000, lr=0.001,
                    decay_lr_freq=4000, decay_lr_rate=0.5,
                    loss_lambda=loss_lambda,
-                   savePath=checkpoint+'CityScapes/',
+                   savePath=checkpoint+'Cityscapes/',
                    reload='sample_policy.model')
 
-torch.save(mtlmodel.state_dict(), 'CityScapes.model')
+# torch.save(mtlmodel.state_dict(), 'CityScapes.model')
