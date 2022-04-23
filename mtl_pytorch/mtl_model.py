@@ -1,8 +1,9 @@
+from operator import mod
 import warnings
+from layer_node import Conv2dNode, BN2dNode, BasicNode
 
 import torch.nn as nn
 import torch
-from mtl_pytorch.layer_node import Conv2dNode, BN2dNode
 from mtl_pytorch.base_node import BasicNode
 from copy import deepcopy
 
@@ -22,14 +23,14 @@ class mtl_model(nn.Module):
         """
         cur_dep = 0
         for module in self.modules():
-            if isinstance(module, BasicNode):
+            if self.check_type(module):
                 module.depth = cur_dep
                 cur_dep += 1
 
     def share_bottom_policy(self, share_num):
         count = 0
         for node in self.modules():
-            if isinstance(node, Conv2dNode):
+            if self.check_type(node):
                 if count == share_num:
                     break
                 else:
@@ -41,10 +42,13 @@ class mtl_model(nn.Module):
 
     def max_node_depth(self):
         max_depth = 0
-        for x in self.modules():
-            if isinstance(x, BasicNode):
-                max_depth = max(x.depth, max_depth)
+        for module in self.modules():
+            if self.check_type(module):
+                max_depth = max(module.depth, max_depth)
         return max_depth
+
+    def check_type(self, module):
+        return isinstance(module, Conv2dNode) or isinstance(module, BN2dNode)
 
     def policy_reg(self, task, policy_idx=None, tau=5, scale=1):
         """
@@ -59,12 +63,12 @@ class mtl_model(nn.Module):
             regulate the policy
         """
         reg = torch.tensor(0)
+        print(self.max_node_depth())
         if policy_idx is None:
             # Regularization for all policy
-            for node in self.modules():
-                if isinstance(node, Conv2dNode):
-                    print(node)
-                    policy_task = node.policy[task]
+            for module in self.modules():
+                if isinstance(module, Conv2dNode):
+                    policy_task = module.policy[task]
                     # gumbel_softmax make sure that we randomly pick each path while training
                     # e.g. if there is a 0.1 chance that our policy choose basic operator,
                     # and 0.9 chance to choose task specific path. Then ordinary probablity model ensure
@@ -85,7 +89,7 @@ class mtl_model(nn.Module):
                     # Reg design3: ln(1+e ^ (g(b) - g(a))) + ln(1+e ^ (g(c) - g(a)))
                     loss = torch.log(1 + torch.exp(scale * (possiblity[1] - possiblity[0]))) + torch.log(
                         1 + torch.exp(scale * (possiblity[2] - possiblity[0])))
-                    weight = (self.max_node_depth() - node.depth) / self.max_node_depth()
+                    weight = (self.max_node_depth() - module.depth) / self.max_node_depth()
                     reg = reg + weight * loss
         elif policy_idx < self.max_policy_idx():
             # Regularization for current trained policy

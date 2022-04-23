@@ -492,7 +492,7 @@ class Trainer():
         return
     
     def load_model(self, savePath, reload):
-        state = torch.load(savePath + reload)
+        state = torch.load(savePath + reload, map_location=torch.device('cpu'))
         self.model.load_state_dict(state['state_dict'])
         return
     

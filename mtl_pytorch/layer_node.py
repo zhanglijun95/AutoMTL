@@ -67,6 +67,7 @@ class Conv2dNode(BasicNode):
         self.policy = nn.ParameterDict()
         self.dsOp = nn.ModuleDict()
         self.build_layer()
+        self.generate_taskOp()
 
     def build_layer(self):
         """
