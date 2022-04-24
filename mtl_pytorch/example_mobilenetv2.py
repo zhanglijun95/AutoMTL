@@ -117,6 +117,7 @@ while not os.path.exists(sample_path + 'sample_policy.model'):
 
 loss_lambda = {'segment_semantic': 1, 'depth_zbuffer': 1}
 # iters = 20000
+# mIoU: 0.258, Pixel Acc:0.637, abs_err: 0.035, rel_err:0.47, sigma:44.4,74.8,87.3
 print('start post_train')
 trainer.post_train(iters=1, lr=0.001,
                    decay_lr_freq=4000, decay_lr_rate=0.5,

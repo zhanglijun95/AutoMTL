@@ -63,7 +63,6 @@ class mtl_model(nn.Module):
             regulate the policy
         """
         reg = torch.tensor(0)
-        print(self.max_node_depth())
         if policy_idx is None:
             # Regularization for all policy
             for module in self.modules():
