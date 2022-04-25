@@ -132,8 +132,6 @@ class MobileNetV2(mtl_model):
 
         self._initialize_weights()
 
-        self.compute_depth()
-
     def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
         # Step 1: get feature from backbone model
         feature = self.features(x, stage, task, tau, hard, policy_idx)

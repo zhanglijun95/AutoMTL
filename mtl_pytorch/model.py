@@ -1,4 +1,3 @@
-from statistics import mode
 import sys
 sys.path.append('/home/yiminghuang/AutoMTL/')
 

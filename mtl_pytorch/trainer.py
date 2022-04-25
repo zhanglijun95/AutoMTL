@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 import torch
 import torch.nn as nn
-# from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 
 
 class Trainer():

@@ -16,6 +16,7 @@ class mtl_model(nn.Module):
         super(mtl_model, self).__init__()
 
         # simply compute the depth for every node
+        self.compute_depth()
 
     def compute_depth(self):
         """
