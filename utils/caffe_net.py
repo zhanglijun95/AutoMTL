@@ -70,6 +70,7 @@ class _Net(object):
             string = text_format.MessageToString(prototxt)
             for origin_name in self.needChange.keys():
                 string = string.replace(origin_name,self.needChange[origin_name])
+            string = string.replace('use_global_stats', 'track_running_stats')
             f.write(string)
 
     def layer(self,layer_name):
