@@ -145,7 +145,7 @@ def _linear(raw,input, weight, bias=None):
     return x
 
 def _split(raw,tensor, split_size, dim=0):
-    # split in pytorch is slice in caffe
+    # split in mtl_pytorch is slice in caffe
     x=raw(tensor, split_size, dim)
     layer_name=log.add_layer('split')
     top_blobs=log.add_blobs(x,name='split_blob')
@@ -177,7 +177,7 @@ def _pool(type,raw,input,x,kernel_size,stride,padding,ceil_mode):
             print("WARNING: the output shape miss match at {}: "
             
                   "input {} output---Pytorch:{}---Caffe:{}\n"
-                  "This is caused by the different implementation that ceil mode in caffe and the floor mode in pytorch.\n"
+                  "This is caused by the different implementation that ceil mode in caffe and the floor mode in mtl_pytorch.\n"
                   "You can add the clip layer in caffe prototxt manually if shape mismatch error is caused in caffe. ".format(layer_name,input.size(),x.size(),caffe_out.size()))
 
 def _max_pool2d(raw,input, kernel_size, stride=None, padding=0, dilation=1,

@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -11,6 +12,7 @@ class Trainer():
     def __init__(self, model, train_dataloader_dict, val_dataloader_dict, criterion_dict, metric_dict, 
                  print_iters=50, val_iters=200, save_iters=200, save_num=5, policy_update_iters=100):
         super(Trainer, self).__init__()
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = model
         self.train_dataloader_dict = train_dataloader_dict
         self.val_dataloader_dict = val_dataloader_dict
@@ -44,7 +46,7 @@ class Trainer():
 #             optimizer.load_state_dict(state['optimizer'])
             start = state['iter'] + 1
         
-        for i in range(start, iters):
+        for i in tqdm(range(start, iters)):
             # Pre-train all weights
             if task_iters is None:
                 self.train_step('pre_train_all', optimizer)
@@ -59,6 +61,7 @@ class Trainer():
                 self.validate('pre_train_all', i, writer=writer)
                 self.model.train()
             if (i+1) % self.save_iters == 0:
+                print(savePath)
                 if savePath is not None:
                     state = {'iter': i,
                             'state_dict': self.model.state_dict(),
@@ -94,7 +97,7 @@ class Trainer():
         
         # Step 2: Train network and policy alternatively
         policy_count = 0
-        for i in range(start, iters):
+        for i in tqdm(range(start, iters)):
             # Step 2-1: Train policy when the current iter is in the first part of policy_network_iters
             if i % (policy_network_iters[0] + policy_network_iters[1]) in range(policy_network_iters[0]):
                 self.train_step('mtl', policy_op, tau=tau)
@@ -121,6 +124,7 @@ class Trainer():
                 
             # Step 6: Save model
             if (i+1) % self.save_iters == 0:
+                print(savePath)
                 if savePath is not None:
                     state = {'iter': i,
                             'state_dict': self.model.state_dict(),
@@ -172,7 +176,7 @@ class Trainer():
         
         # Step 2: Train network and policy alternatively
         policy_count = 0
-        for i in range(start, iters):
+        for i in tqdm(range(start, iters)):
             # Step 2-1: Train policy when the current iter is in the first part of policy_network_iters
             if i % (policy_network_iters[0] + policy_network_iters[1]) in range(policy_network_iters[0]):
                 self.train_step_with_reg('mtl', policy_op, tau=tau,loss_lambda=loss_lambda)
@@ -255,7 +259,7 @@ class Trainer():
                 optimizer.load_state_dict(state['optimizer'])
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=decay_lr_freq, gamma=decay_lr_rate)
 
-        for i in range(start, iters):
+        for i in tqdm(range(start, iters)):
             # Step 2: Train the network with policy
             if task_iters is None:
                 self.train_step('mtl', optimizer, scheduler, hard=True, loss_lambda=loss_lambda)
@@ -269,6 +273,7 @@ class Trainer():
                 self.validate('mtl', i, hard=True, writer=writer)
                 self.model.train()
             if (i+1) % self.save_iters == 0:
+                print(savePath)
                 if savePath is not None:
                     state = {'iter': i,
                             'state_dict': self.model.state_dict(),
@@ -292,13 +297,14 @@ class Trainer():
             except:
                 continue
             
-            x = data['input']
-            y = data['label']
+            x = data['input'].to(self.device)
+            y = data['label'].to(self.device)
 
             optimizer.zero_grad()
             output = self.model(x, stage, task, tau, hard, policy_idx)
+
             if 'mask' in data:
-                loss = self.criterion_dict[task](output, y, data['mask'])
+                loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
             else:
                 loss = self.criterion_dict[task](output, y)
                 
@@ -330,13 +336,14 @@ class Trainer():
             except:
                 continue
                 
-            x = data['input']
-            y = data['label']
+            x = data['input'].to(self.device)
+            y = data['label'].to(self.device)
 
             optimizer.zero_grad()
             output = self.model(x, stage, task, tau, hard, policy_idx)
+
             if 'mask' in data:
-                tloss = self.criterion_dict[task](output, y, data['mask'])
+                tloss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
             else:
                 tloss = self.criterion_dict[task](output, y)
             
@@ -366,13 +373,13 @@ class Trainer():
         except:
             return
 
-        x = data['input']
-        y = data['label']
+        x = data['input'].to(self.device)
+        y = data['label'].to(self.device)
 
         optimizer.zero_grad()
         output = self.model(x, stage, task, tau, hard, policy_idx)
         if 'mask' in data:
-            loss = self.criterion_dict[task](output, y, data['mask'])
+            loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
         else:
             loss = self.criterion_dict[task](output, y)
         loss.backward()
@@ -388,14 +395,14 @@ class Trainer():
         for task in self.tasks:
             loss_list = []
             for i, data in enumerate(self.val_dataloader_dict[task]):
-                x = data['input']
-                y = data['label']
+                x = data['input'].to(self.device)
+                y = data['label'].to(self.device)
 
                 output = self.model(x, stage, task, tau, hard, policy_idx)
 
                 if 'mask' in data:
-                    loss = self.criterion_dict[task](output, y, data['mask'])
-                    self.metric_dict[task](output, y, data['mask'])
+                    loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
+                    self.metric_dict[task](output, y, data['mask'].to(self.device))
                 else:
                     loss = self.criterion_dict[task](output, y)
                     self.metric_dict[task](output, y)
@@ -415,14 +422,14 @@ class Trainer():
         self.model.eval()
         loss_list = []
         for i, data in enumerate(self.val_dataloader_dict[task]):
-            x = data['input']
-            y = data['label']
+            x = data['input'].to(self.device)
+            y = data['label'].to(self.device)
 
             output = self.model(x, stage, task, tau, hard, policy_idx)
 
             if 'mask' in data:
-                loss = self.criterion_dict[task](output, y, data['mask'])
-                self.metric_dict[task](output, y, data['mask'])
+                loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
+                self.metric_dict[task](output, y, data['mask'].to(self.device))
             else:
                 loss = self.criterion_dict[task](output, y)
                 self.metric_dict[task](output, y)
@@ -485,7 +492,7 @@ class Trainer():
         return
     
     def load_model(self, savePath, reload):
-        state = torch.load(savePath + reload)
+        state = torch.load(savePath + reload, map_location=torch.device('cpu'))
         self.model.load_state_dict(state['state_dict'])
         return
     
