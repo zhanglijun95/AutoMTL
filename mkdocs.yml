@@ -2,8 +2,8 @@ site_name: AutoMTL
 theme:
   name: material
 nav:
-  - Home: index.md
+  - Home: docs/index.md
   - Example:
-      - mobilenetv2: mobilenetv2.md
+      - mobilenetv2: docs/mobilenetv2.md
   - Documentation:
-      - Node: layer_node.md
+      - Node: docs/layer_node.md
