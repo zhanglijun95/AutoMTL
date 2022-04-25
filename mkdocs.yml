@@ -1,5 +1,6 @@
 site_name: AutoMTL
-theme: readthedocs
+theme:
+  name: material
 nav:
   - Home: index.md
   - Example:
