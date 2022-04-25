@@ -1,0 +1,21 @@
+/home/yiminghuang/AutoMTL/mtl_pytorch
+no change     /home/yiminghuang/anaconda3/condabin/conda
+no change     /home/yiminghuang/anaconda3/bin/conda
+no change     /home/yiminghuang/anaconda3/bin/conda-env
+no change     /home/yiminghuang/anaconda3/bin/activate
+no change     /home/yiminghuang/anaconda3/bin/deactivate
+no change     /home/yiminghuang/anaconda3/etc/profile.d/conda.sh
+no change     /home/yiminghuang/anaconda3/etc/fish/conf.d/conda.fish
+no change     /home/yiminghuang/anaconda3/shell/condabin/Conda.psm1
+no change     /home/yiminghuang/anaconda3/shell/condabin/conda-hook.ps1
+no change     /home/yiminghuang/anaconda3/lib/python3.9/site-packages/xontrib/conda.xsh
+no change     /home/yiminghuang/anaconda3/etc/profile.d/conda.csh
+no change     /home/yiminghuang/.bashrc
+No action taken.
+activate
+start training! 
+start pre train
+start alter train
+start post_train
+Task Policy:
+OrderedDict([('features.models.0.models.0.policy.segment_semantic', tensor([0., 0., 1.], device='cuda:0')), ('features.models.18.models.0.policy.segment_semantic', tensor([0., 0., 1.], device='cuda:0')), ('features.models.0.models.0.policy.depth_zbuffer', tensor([1., 0., 0.], device='cuda:0')), ('features.models.18.models.0.policy.depth_zbuffer', tensor([0., 1., 0.], device='cuda:0'))])

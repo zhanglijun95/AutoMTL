@@ -104,6 +104,7 @@ class MobileNetV2(mtl_model):
             [6, 160, 3, 2],
             [6, 320, 1, 1],
         ]
+        self.c = Conv2dNode
 
         # building first layer
         assert input_size % 32 == 0
@@ -115,9 +116,9 @@ class MobileNetV2(mtl_model):
             output_channel = make_divisible(c * width_mult) if t > 1 else c
             for i in range(n):
                 if i == 0:
-                    self.features.append(block(input_channel, output_channel, s, expand_ratio=t))
+                    self.features.append(block(input_channel, output_channel, s, expand_ratio=t, task_list=self.task_list))
                 else:
-                    self.features.append(block(input_channel, output_channel, 1, expand_ratio=t))
+                    self.features.append(block(input_channel, output_channel, 1, expand_ratio=t, task_list=self.task_list))
                 input_channel = output_channel
         # building last several layers
         self.features.append(conv_1x1_bn(input_channel, self.last_channel,
@@ -131,6 +132,8 @@ class MobileNetV2(mtl_model):
         self._initialize_weights()
 
         self.compute_depth()
+
+        self.max_node_depth()
 
     def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
         # Step 1: get feature from backbone model
@@ -162,7 +165,6 @@ class MobileNetV2(mtl_model):
 
 def mobilenet_v2(pretrained=True, heads_dict={}):
     model = MobileNetV2(width_mult=1, heads_dict=heads_dict)
-
     if pretrained:
         try:
             from torch.hub import load_state_dict_from_url

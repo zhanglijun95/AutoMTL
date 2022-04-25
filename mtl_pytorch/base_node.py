@@ -3,10 +3,8 @@ import torch
 import copy
 import sys
 # Author: yiming huang
-import google.protobuf.text_format
 
-from framework.layer_containers import LazyLayer
-
+# from framework.layer_containers import LazyLayer
 
 class BasicNode(nn.Module):
 

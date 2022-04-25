@@ -1,3 +1,7 @@
+from statistics import mode
+import sys
+sys.path.append('/home/yiminghuang/AutoMTL/')
+
 import torch
 import torch.nn as nn
 from mtl_pytorch import layer_node
@@ -27,7 +31,9 @@ if __name__ == '__main__':
                       [1, 2, 3, 4],
                       [1, 2, 3, 4]]]])
     x = torch.tensor(inp, dtype=torch.float)
-
+    for module in model.modules():
+        print(module)
+        print(isinstance(module, layer_node.Conv2dNode))
     print(model(x)) # forward using basic operator
     # print(model(x, stage='mtl', task='segment_sementic')) # forward with specific task operator
 
