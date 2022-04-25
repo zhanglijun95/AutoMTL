@@ -1,3 +1,8 @@
+## UPDATE 4/25: PyTorch Friendly APIs for AutoMTL
+We add PyTorch APIs in ```APIs/``` for more convenient multi-task model construction.    
+Now, users could directly adopt VCNs in ```layer_node.py```, including Conv2dNode and BN2dNode, when building a customized multi-task model (should be inherited from ```mtl_model.py```) in PyTorch. An example can be found in ```mobilenetv2.py``` and ```Example_mobilenetv2.ipynb.py```.   
+The detailed documentation is online [here](https://zhanglijun95.github.io/AutoMTL/). 
+
 # AutoMTL: A Programming Framework for Automated Multi-Task Learning 
 This is the website for our paper "AutoMTL: A Programming Framework for Automated Multi-Task Learning". 
 The arXiv version can be found [here](https://arxiv.org/pdf/2110.13076.pdf).
@@ -61,7 +66,7 @@ Our code can be divided into three parts: code for data, code of AutoMTL, and ot
   For each dataset, we offer a corresponding PyTorch dataloader with a specific _task_ variable.
   *  Heads ```pixel2pixel.py```: 
   The **ASPP** head [[4]](#4) is implemented for the pixel-to-pixel vision tasks.
-  *  Metrics ```pixel2pixel_loss/metrics.py```: 
+  *  Metrics ```pixel2pixel_loss.py``` and ```pixel2pixel_metrics.py```: 
   For each task, it has its own criterion and metric.
 
 * AutoMTL
