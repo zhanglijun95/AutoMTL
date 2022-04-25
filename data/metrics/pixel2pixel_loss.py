@@ -43,7 +43,7 @@ class DataCriterions(nn.Module):
             gt_mask = F.interpolate(mask.float(), size=new_shape)
             binary_mask = (gt != 255) * (gt_mask.int() == 1)
         else:
-            binary_mask = (torch.sum(gt, dim=1) > 3 * 1e-5).unsqueeze(1)
+            binary_mask = (torch.sum(gt, dim=1) > 3 * 1e-5).unsqueeze(1).cuda()
         prediction = pred.masked_select(binary_mask)
         gt = gt.masked_select(binary_mask)
         loss = self.l1_loss(prediction, gt)
@@ -78,7 +78,7 @@ class TaskonomyCriterions(DataCriterions):
         
     def define_loss(self, dataroot):
         super(TaskonomyCriterions, self).define_loss()
-        weight = torch.from_numpy(np.load(os.path.join(dataroot, 'semseg_prior_factor.npy'))).float()
+        weight = torch.from_numpy(np.load(os.path.join(dataroot, 'semseg_prior_factor.npy'))).cuda().float()
         self.cross_entropy = nn.CrossEntropyLoss(weight=weight, ignore_index=255)
         
 class CityScapesCriterions(DataCriterions):

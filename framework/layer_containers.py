@@ -4,7 +4,7 @@ import torch.nn as nn
 class EltwiseOp(nn.Module):
     def __init__(self, operation):
         # Funtion: Perform element-wise operations
-        #          Correponding to the EltwiseOp Enum in mtl_pytorch.proto
+        #          Correponding to the EltwiseOp Enum in pytorch.proto
         #          0: Product; 1: Add; 2: Max
         super(EltwiseOp, self).__init__()
         self.op = operation
@@ -25,7 +25,7 @@ class AbstractPool(nn.Module):
     def __init__(self, pool_method, global_pooling, kernel_size, stride, padding, ceil_mode):
         # Funtion: Perform different pooling
         super(AbstractPool, self).__init__()
-        #          Correponding to the PoolMethod Enum in mtl_pytorch.proto
+        #          Correponding to the PoolMethod Enum in pytorch.proto
         #          0: Max; 1: Avg
         self.pool_method = pool_method
         self.global_pooling = global_pooling

@@ -12,6 +12,7 @@ class Trainer():
                  print_iters=50, val_iters=200, save_iters=200, save_num=5, policy_update_iters=100):
         super(Trainer, self).__init__()
         self.model = model
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.train_dataloader_dict = train_dataloader_dict
         self.val_dataloader_dict = val_dataloader_dict
         self.criterion_dict = criterion_dict
@@ -292,13 +293,13 @@ class Trainer():
             except:
                 continue
             
-            x = data['input']
-            y = data['label']
+            x = data['input'].to(self.device)
+            y = data['label'].to(self.device)
 
             optimizer.zero_grad()
             output = self.model(x, stage, task, tau, hard, policy_idx)
             if 'mask' in data:
-                loss = self.criterion_dict[task](output, y, data['mask'])
+                loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
             else:
                 loss = self.criterion_dict[task](output, y)
                 
@@ -330,13 +331,13 @@ class Trainer():
             except:
                 continue
                 
-            x = data['input']
-            y = data['label']
+            x = data['input'].to(self.device)
+            y = data['label'].to(self.device)
 
             optimizer.zero_grad()
             output = self.model(x, stage, task, tau, hard, policy_idx)
             if 'mask' in data:
-                tloss = self.criterion_dict[task](output, y, data['mask'])
+                tloss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
             else:
                 tloss = self.criterion_dict[task](output, y)
             
@@ -366,13 +367,13 @@ class Trainer():
         except:
             return
 
-        x = data['input']
-        y = data['label']
+        x = data['input'].to(self.device)
+        y = data['label'].to(self.device)
 
         optimizer.zero_grad()
         output = self.model(x, stage, task, tau, hard, policy_idx)
         if 'mask' in data:
-            loss = self.criterion_dict[task](output, y, data['mask'])
+            loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
         else:
             loss = self.criterion_dict[task](output, y)
         loss.backward()
@@ -388,14 +389,14 @@ class Trainer():
         for task in self.tasks:
             loss_list = []
             for i, data in enumerate(self.val_dataloader_dict[task]):
-                x = data['input']
-                y = data['label']
+                x = data['input'].to(self.device)
+                y = data['label'].to(self.device)
 
                 output = self.model(x, stage, task, tau, hard, policy_idx)
 
                 if 'mask' in data:
-                    loss = self.criterion_dict[task](output, y, data['mask'])
-                    self.metric_dict[task](output, y, data['mask'])
+                    loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
+                    self.metric_dict[task](output, y, data['mask'].to(self.device))
                 else:
                     loss = self.criterion_dict[task](output, y)
                     self.metric_dict[task](output, y)
@@ -415,14 +416,14 @@ class Trainer():
         self.model.eval()
         loss_list = []
         for i, data in enumerate(self.val_dataloader_dict[task]):
-            x = data['input']
-            y = data['label']
+            x = data['input'].to(self.device)
+            y = data['label'].to(self.device)
 
             output = self.model(x, stage, task, tau, hard, policy_idx)
 
             if 'mask' in data:
-                loss = self.criterion_dict[task](output, y, data['mask'])
-                self.metric_dict[task](output, y, data['mask'])
+                loss = self.criterion_dict[task](output, y, data['mask'].to(self.device))
+                self.metric_dict[task](output, y, data['mask'].to(self.device))
             else:
                 loss = self.criterion_dict[task](output, y)
                 self.metric_dict[task](output, y)

@@ -4,7 +4,7 @@ import torch.nn as nn
 from .base_node import InputNode
 from .layer_node import *
 
-# from proto import pytorch_pb2
+from proto import pytorch_pb2
 import google.protobuf.text_format
 import sys
 import warnings
