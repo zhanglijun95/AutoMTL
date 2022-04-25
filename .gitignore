@@ -1,7 +1,0 @@
-/mike_learn
-**/datasets
-.vscode
-**/checkpoint
-**/exp/**
-**/*.model
-**/__pycache__
