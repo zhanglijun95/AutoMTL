@@ -131,6 +131,8 @@ class MobileNetV2(mtl_model):
         # self.classifier = nn.Linear(self.last_channel, n_class)
 
         self._initialize_weights()
+        # NEEDED: simply compute the depth for every node
+        self.compute_depth()
 
     def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
         # Step 1: get feature from backbone model
