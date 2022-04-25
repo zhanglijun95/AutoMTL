@@ -23,7 +23,7 @@ Welcome to cite our work if you find it is helpful to your research.
 # Description
 ### Environment
 ```bash
-conda install mtl_pytorch==1.6.0 torchvision==0.7.0 -c mtl_pytorch # Or higher
+conda install pytorch==1.6.0 torchvision==0.7.0 -c pytorch # Or higher
 conda install protobuf
 pip install opencv-python
 pip install scikit-learn

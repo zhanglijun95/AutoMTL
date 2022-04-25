@@ -43,8 +43,8 @@ class TransLog(object):
         doing init() with inputs Variable before using it
         """
         self.layers={}
-        self.detail_layers={}  
-        self.detail_blobs={}  
+        self.detail_layers={}
+        self.detail_blobs={}
         self._blobs=Blob_LOG()
         self._blobs_data=[]
         self.cnet=caffe_net.Caffemodel('')
@@ -74,7 +74,7 @@ class TransLog(object):
             blob_id=int(id(blob))
             if name not in self.detail_blobs.keys():
                 self.detail_blobs[name] =0
-            self.detail_blobs[name] +=1           
+            self.detail_blobs[name] +=1
             if with_num:
                 rst.append('{}{}'.format(name,self.detail_blobs[name]))
             else:
@@ -145,7 +145,7 @@ def _linear(raw,input, weight, bias=None):
     return x
 
 def _split(raw,tensor, split_size, dim=0):
-    # split in mtl_pytorch is slice in caffe
+    # split in pytorch is slice in caffe
     x=raw(tensor, split_size, dim)
     layer_name=log.add_layer('split')
     top_blobs=log.add_blobs(x,name='split_blob')
@@ -177,7 +177,7 @@ def _pool(type,raw,input,x,kernel_size,stride,padding,ceil_mode):
             print("WARNING: the output shape miss match at {}: "
             
                   "input {} output---Pytorch:{}---Caffe:{}\n"
-                  "This is caused by the different implementation that ceil mode in caffe and the floor mode in mtl_pytorch.\n"
+                  "This is caused by the different implementation that ceil mode in caffe and the floor mode in pytorch.\n"
                   "You can add the clip layer in caffe prototxt manually if shape mismatch error is caused in caffe. ".format(layer_name,input.size(),x.size(),caffe_out.size()))
 
 def _max_pool2d(raw,input, kernel_size, stride=None, padding=0, dilation=1,
@@ -417,10 +417,10 @@ def _interpolate(raw, input,size=None, scale_factor=None, mode='nearest', align_
 #sigmid layer
 def _sigmoid(raw, input):
     # Applies the element-wise function:
-    # 
+    #
     # Sigmoid(x)= 1/(1+exp(−x)）
-    # 
-    # ​	
+    #
+    # ​
     x = raw(input)
     name = log.add_layer(name='sigmoid')
     log.add_blobs([x], name='sigmoid_blob')
@@ -432,10 +432,10 @@ def _sigmoid(raw, input):
 #tanh layer
 def _tanh(raw, input):
     # Applies the element-wise function:
-    # 
+    #
     # torch.nn.Tanh
-    # 
-    # ​	
+    #
+    # ​
     x = raw(input)
     name = log.add_layer(name='tanh')
     log.add_blobs([x], name='tanh_blob')
@@ -652,7 +652,7 @@ def _unsqueeze(input, *args):
 
 def _expand_as(input, *args):
     # only support expand A(1, 1, H, W) to B(1, C, H, W)
-    
+
     x = raw__expand_as__(input, *args)
     layer_name = log.add_layer(name="expand_as", with_num=True)
     log.add_blobs([x], name='expand_as_blob')
