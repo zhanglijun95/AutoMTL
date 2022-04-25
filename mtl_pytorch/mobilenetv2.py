@@ -1,3 +1,4 @@
+# A Multi-task-learning model
 # based on https://github.com/tonylins/pytorch-mobilenet-v2
 import warnings
 
@@ -36,7 +37,7 @@ def make_divisible(x, divisible_by=8):
 
 
 class InvertedResidual(nn.Module):
-    def __init__(self, inp, oup, stride, expand_ratio, task_list={}):
+    def __init__(self, inp, oup, stride, expand_ratio, task_list=[]):
         super(InvertedResidual, self).__init__()
         self.stride = stride
         assert stride in [1, 2]
@@ -132,8 +133,6 @@ class MobileNetV2(mtl_model):
         self._initialize_weights()
 
         self.compute_depth()
-
-        self.max_node_depth()
 
     def forward(self, x, stage='common', task=None, tau=5, hard=False, policy_idx=None):
         # Step 1: get feature from backbone model
