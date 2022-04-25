@@ -7,3 +7,4 @@ nav:
       - mobilenetv2: mobilenetv2.md
   - Documentation:
       - Node: layer_node.md
+      - MTL_Model: mtl_model.md
