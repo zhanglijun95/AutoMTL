@@ -1,7 +1,8 @@
 ## UPDATE 4/25: PyTorch Friendly APIs for AutoMTL
 We add PyTorch APIs in ```APIs/``` for more convenient multi-task model construction.    
-Now, users could directly adopt VCNs in ```layer_node.py```, including Conv2dNode and BN2dNode, when building a customized multi-task model (should be inherited from ```mtl_model.py```) in PyTorch. An example can be found in ```mobilenetv2.py``` and ```Example_mobilenetv2.ipynb.py```.   
-The detailed documentation is online [here](https://zhanglijun95.github.io/AutoMTL/). 
+* Now, users could directly adopt VCNs in ```layer_node.py```, including Conv2dNode and BN2dNode, when building a customized multi-task model (should be inherited from ```mtl_model.py```) in PyTorch. 
+* An example can be found in ```mobilenetv2.py``` and ```Example_mobilenetv2.ipynb.py```.   
+* The detailed documentation is online [here](https://zhanglijun95.github.io/AutoMTL/). 
 
 # AutoMTL: A Programming Framework for Automated Multi-Task Learning 
 This is the website for our paper "AutoMTL: A Programming Framework for Automated Multi-Task Learning". 
