@@ -1,4 +1,4 @@
-## UPDATE 4/25: PyTorch Friendly APIs for AutoMTL
+## UPDATE 4/25/2022: PyTorch Friendly APIs for AutoMTL
 We add PyTorch APIs in ```APIs/``` for more convenient multi-task model construction.    
 * Now, users could directly adopt VCNs in ```layer_node.py```, including Conv2dNode and BN2dNode, when building a customized multi-task model (should be inherited from ```mtl_model.py```) in PyTorch. 
 * An example can be found in ```mobilenetv2.py``` and ```Example_mobilenetv2.ipynb.py```.   
