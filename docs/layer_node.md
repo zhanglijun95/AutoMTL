@@ -1,4 +1,4 @@
-# [layer_node](https://github.com/zhanglijun95/AutoMTL/blob/main/mtl_pytorch/layer_node.py)
+# [Layer Node](https://github.com/zhanglijun95/AutoMTL/blob/main/APIs/layer_node.py)
 ## Conv2dNode
 ```python
 layer_node.Conv2dNode(in_channels, out_channels, kernel_size, 

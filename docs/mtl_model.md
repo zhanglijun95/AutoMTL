@@ -1,41 +1,12 @@
-# [layer_node](https://github.com/zhanglijun95/AutoMTL/blob/main/mtl_pytorch/layer_node.py)
-## Conv2dNode
+# [MTL Model](https://github.com/zhanglijun95/AutoMTL/blob/main/APIs/mtl_model.py)
+## mtl_model
 ```python
-layer_node.Conv2dNode(in_channels, out_channels, kernel_size, 
-                    stride, padding, paddingmode, dilation, bias, 
-                    groups, task_list)
+mtl_model.mtl_model()
 ```
 
+Parent class for customized multi-task model.
 
-Conv2d embedded with task. 
-
-### argument
-* arguments except `task_list` are the same as [Conv2d](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
-* `task_list` should be a list of tasks that you are interested in trainning
-
-## BN2dNode
-```python
-layer_node.BN2dNode(num_features: int,
-                    eps: float, 
-                    momentum: float, 
-                    affine: bool, 
-                    track_running_stats: bool, 
-                    task_list: list)
-```
-
-BN2d embedded with task
-
-### argument
-* arguments except `task_list` are the same as [BatchNorm2d](https://pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html)
-* `task_list` should be a list of tasks that you are interested in trainning
-
-
-## Sequential 
-```python
-layer_node.Sequential(seq)
-```
-
-A useful wrapper class for applying special forwarding in nn.Sequential
-
-### Argument
-* `seq`: should be `nn.Sequential` type of module
+### function
+* `compute_depth()` should be called at the end of the `__init__()` for the child model class inherited from `mtl_model`. See example in `[mobilenetv2.py](https://github.com/zhanglijun95/AutoMTL/blob/main/APIs/mobilenetv2.py)`.
+* `policy_reg()` will be called automatically when running `alter_train_with_reg()` of `Trainer`.
+* **Note: If choose to not inherit from `mtl_model`, please run `alter_train()` of `Trainer` at the second alter_train stage.
