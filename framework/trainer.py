@@ -20,6 +20,8 @@ class Trainer():
         
         self.tasks = list(self.train_dataloader_dict.keys())
         self.train_iter_dict = {}
+        self.train_network_iter_dict = {}
+        self.train_policy_iter_dict = {}
         self.loss_list = {}
         self.set_train_loss_data_iter()
         
@@ -98,11 +100,11 @@ class Trainer():
         for i in range(start, iters):
             # Step 2-1: Train policy when the current iter is in the first part of policy_network_iters
             if i % (policy_network_iters[0] + policy_network_iters[1]) in range(policy_network_iters[0]):
-                self.train_step('mtl', policy_op, tau=tau)
+                self.train_step('mtl', policy_op, alter_train='policy', tau=tau)
                 policy_count += 1
             # Step 2-2: Train network when the current iter is in the second part of policy_network_iters
             else:
-                self.train_step('mtl', network_op,tau=tau)
+                self.train_step('mtl', network_op,alter_train='network', tau=tau)
 
             # Step 3: Update tau in policy every self.policy_update_iters
             if policy_count > self.policy_update_iters and tau > 1e-6:
@@ -176,11 +178,11 @@ class Trainer():
         for i in range(start, iters):
             # Step 2-1: Train policy when the current iter is in the first part of policy_network_iters
             if i % (policy_network_iters[0] + policy_network_iters[1]) in range(policy_network_iters[0]):
-                self.train_step_with_reg('mtl', policy_op, tau=tau,loss_lambda=loss_lambda)
+                self.train_step_with_reg('mtl', policy_op, alter_train='policy', tau=tau,loss_lambda=loss_lambda)
                 policy_count += 1
             # Step 2-2: Train network when the current iter is in the second part of policy_network_iters
             else:
-                self.train_step_with_reg('mtl', network_op, tau=tau, scale=policy_scale, loss_lambda=loss_lambda)
+                self.train_step_with_reg('mtl', network_op, alter_train='network', tau=tau, scale=policy_scale, loss_lambda=loss_lambda)
 
             # Step 3: Update tau in policy every self.policy_update_iters
             if policy_count > self.policy_update_iters and tau > 1e-6:
@@ -282,16 +284,33 @@ class Trainer():
         return
     
     # Helper Functions - Train and Validation
-    def train_step(self, stage, optimizer, scheduler=None, tau=1, hard=False, policy_idx=None, loss_lambda=None):
+    def train_step(self, stage, optimizer, scheduler=None, alter_train=None, tau=1, hard=False, policy_idx=None, loss_lambda=None):
         # Function: Train one iter for each task 
-        for task in self.tasks:
-            try:
-                data = next(self.train_iter_dict[task])
-            except StopIteration:
-                self.train_iter_dict[task] = iter(self.train_dataloader_dict[task])
-                continue
-            except:
-                continue
+        for task in self.tasks: 
+            if alter_train is None:
+                try:
+                    data = next(self.train_iter_dict[task])
+                except StopIteration:
+                    self.train_iter_dict[task] = iter(self.train_dataloader_dict[task][0])
+                    continue
+                except:
+                    continue
+            elif alter_train == 'network':
+                try:
+                    data = next(self.train_network_iter_dict[task])
+                except StopIteration:
+                    self.train_network_iter_dict[task] = iter(self.train_dataloader_dict[task][1])
+                    continue
+                except:
+                    continue
+            elif alter_train == 'policy':
+                try:
+                    data = next(self.train_policy_iter_dict[task])
+                except StopIteration:
+                    self.train_policy_iter_dict[task] = iter(self.train_dataloader_dict[task][2])
+                    continue
+                except:
+                    continue
             
             x = data['input'].to(self.device)
             y = data['label'].to(self.device)
@@ -318,18 +337,35 @@ class Trainer():
             scheduler.step()
         return
     
-    def train_step_with_reg(self, stage, optimizer, schedular=None, 
+    def train_step_with_reg(self, stage, optimizer, schedular=None, alter_train=None, 
                             tau=1, hard=False, 
                             policy_idx=None, scale=6, loss_lambda=1.0):
         # Function: Train one iter for each task 
         for task in self.tasks:
-            try:
-                data = next(self.train_iter_dict[task])
-            except StopIteration:
-                self.train_iter_dict[task] = iter(self.train_dataloader_dict[task])
-                continue
-            except:
-                continue
+            if alter_train is None:
+                try:
+                    data = next(self.train_iter_dict[task])
+                except StopIteration:
+                    self.train_iter_dict[task] = iter(self.train_dataloader_dict[task][0])
+                    continue
+                except:
+                    continue
+            elif alter_train == 'network':
+                try:
+                    data = next(self.train_network_iter_dict[task])
+                except StopIteration:
+                    self.train_network_iter_dict[task] = iter(self.train_dataloader_dict[task][1])
+                    continue
+                except:
+                    continue
+            elif alter_train == 'policy':
+                try:
+                    data = next(self.train_policy_iter_dict[task])
+                except StopIteration:
+                    self.train_policy_iter_dict[task] = iter(self.train_dataloader_dict[task][2])
+                    continue
+                except:
+                    continue
                 
             x = data['input'].to(self.device)
             y = data['label'].to(self.device)
@@ -357,15 +393,32 @@ class Trainer():
             scheduler.step()
         return
     
-    def train_step_task(self, stage, task, optimizer, scheduler=None, tau=1, hard=False, policy_idx=None):
+    def train_step_task(self, stage, task, optimizer, scheduler=None, alter_train=None, tau=1, hard=False, policy_idx=None):
         # Function: Train one iter for one task 
-        try:
-            data = next(self.train_iter_dict[task])
-        except StopIteration:
-            self.train_iter_dict[task] = iter(self.train_dataloader_dict[task])
-            return
-        except:
-            return
+        if alter_train is None:
+            try:
+                data = next(self.train_iter_dict[task])
+            except StopIteration:
+                self.train_iter_dict[task] = iter(self.train_dataloader_dict[task][0])
+                continue
+            except:
+                continue
+        elif alter_train == 'network':
+            try:
+                data = next(self.train_network_iter_dict[task])
+            except StopIteration:
+                self.train_network_iter_dict[task] = iter(self.train_dataloader_dict[task][1])
+                continue
+            except:
+                continue
+        elif alter_train == 'policy':
+            try:
+                data = next(self.train_policy_iter_dict[task])
+            except StopIteration:
+                self.train_policy_iter_dict[task] = iter(self.train_dataloader_dict[task][2])
+                continue
+            except:
+                continue
 
         x = data['input'].to(self.device)
         y = data['label'].to(self.device)
@@ -507,8 +560,10 @@ class Trainer():
     
     def set_train_loss_data_iter(self):
         for task in self.tasks:
-#             self.train_iter_dict[task] = iter(self.cycle(self.train_dataloader_dict[task]))
-            self.train_iter_dict[task] = iter(self.train_dataloader_dict[task])
+#             self.train_iter_dict[task] = iter(self.cycle(self.train_dataloader_dict[task][0]))
+            self.train_iter_dict[task] = iter(self.train_dataloader_dict[task][0])
+            self.train_network_iter_dict[task] = iter(self.train_dataloader_dict[task][1])
+            self.train_policy_iter_dict[task] = iter(self.train_dataloader_dict[task][2])
             self.loss_list[task] = []
         return
     

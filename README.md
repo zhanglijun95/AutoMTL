@@ -97,11 +97,15 @@ You can also define your own dataloader, criterion, and evaluation metrics. Plea
 
 ### dataloader dictionary
 ``` bash
-trainDataloaderDict = {}
+trainDataloaderDict = {[]}
 valDataloaderDict = {}
 for task in tasks:
     dataset = CityScapes(dataroot, 'train', task, crop_h=224, crop_w=224)
     trainDataloaderDict[task] = DataLoader(dataset, <batch_size>, shuffle=True)
+    dataset1 = CityScapes(dataroot, 'train1', task, crop_h=224, crop_w=224)
+    trainDataloaderDict[task].append(DataLoader(dataset1, 16, shuffle=True)) # for network param training
+    dataset2 = CityScapes(dataroot, 'train2', task, crop_h=224, crop_w=224)
+    trainDataloaderDict[task].append(DataLoader(dataset2, 16, shuffle=True)) # for policy param training
 
     dataset = CityScapes(dataroot, 'test', task)
     valDataloaderDict[task] = DataLoader(dataset, <batch_size>, shuffle=True)

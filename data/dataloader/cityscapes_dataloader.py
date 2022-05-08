@@ -108,7 +108,7 @@ class CityScapes(Dataset):
         elif  self.task is 'depth_zbuffer':
             label = np.load(os.path.join(self.dataroot, depth_path))
 
-        if self.mode in ['train', 'train2']:
+        if self.mode in ['train','train1', 'train2']:
             img, label = self.__scale__(img, label)
             img, label = self.__mirror__(img, label)
             img, label = self.__random_crop_and_pad_image_and_labels__(img, label)

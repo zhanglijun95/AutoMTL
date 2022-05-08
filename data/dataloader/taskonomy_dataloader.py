@@ -318,7 +318,7 @@ class Taskonomy(Dataset):
             label_p = self.resize_rescale_image(label, current_scale=(0, 0.08))
         
         # Step 3: Transformations
-        if self.mode is 'train':
+        if self.mode in ['train','train1', 'train2']:
             img_p, label_p, label_mask = self.__scale__(img_p, label_p, label_mask)
             img_p, label_p, label_mask = self.__mirror__(img_p, label_p, label_mask)
             img_p, label_p, label_mask = self.__random_crop_and_pad_image_and_labels__(img_p, label_p, label_mask)
