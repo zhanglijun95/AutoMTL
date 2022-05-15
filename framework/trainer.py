@@ -400,25 +400,25 @@ class Trainer():
                 data = next(self.train_iter_dict[task])
             except StopIteration:
                 self.train_iter_dict[task] = iter(self.train_dataloader_dict[task][0])
-                continue
+                return
             except:
-                continue
+                return
         elif alter_train == 'network':
             try:
                 data = next(self.train_network_iter_dict[task])
             except StopIteration:
                 self.train_network_iter_dict[task] = iter(self.train_dataloader_dict[task][1])
-                continue
+                return
             except:
-                continue
+                return
         elif alter_train == 'policy':
             try:
                 data = next(self.train_policy_iter_dict[task])
             except StopIteration:
                 self.train_policy_iter_dict[task] = iter(self.train_dataloader_dict[task][2])
-                continue
+                return
             except:
-                continue
+                return
 
         x = data['input'].to(self.device)
         y = data['label'].to(self.device)
