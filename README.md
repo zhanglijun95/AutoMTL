@@ -4,8 +4,8 @@ We add PyTorch APIs in ```APIs/``` for more convenient multi-task model construc
 * An example can be found in ```mobilenetv2.py``` and ```Example_mobilenetv2.ipynb```.   
 * The detailed documentation is online [here](https://zhanglijun95.github.io/AutoMTL/). 
 
-# AutoMTL: A Programming Framework for Automated Multi-Task Learning 
-This is the website for our paper "AutoMTL: A Programming Framework for Automated Multi-Task Learning". 
+# AutoMTL: A Programming Framework for Automating Efficient Multi-Task Learning 
+This is the website for our paper "AutoMTL: A Programming Framework for Automating Efficient Multi-Task Learning". 
 The arXiv version can be found [here](https://arxiv.org/pdf/2110.13076.pdf).
 
 ### Abstract
