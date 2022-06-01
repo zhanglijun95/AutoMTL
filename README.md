@@ -28,11 +28,10 @@ Welcome to cite our work if you find it is helpful to your research.
 
 # Description
 ### Environment
+You can build on your conda environment from the provided ```environment.yml```. Feel free to change the env name in the file.
+
 ```bash
-conda install pytorch==1.6.0 torchvision==0.7.0 -c pytorch # Or higher
-conda install protobuf
-pip install opencv-python
-pip install scikit-learn
+conda env create -f environment.yml
 ```
 
 ### Datasets
