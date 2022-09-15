@@ -1,3 +1,5 @@
+## Good News 09/15/2022: Our paper has been accepted by NeurIPS 2022!
+
 ## UPDATE 4/25/2022: PyTorch Friendly APIs for AutoMTL
 We add PyTorch APIs in ```APIs/``` for more convenient multi-task model construction.    
 * Now, users could directly adopt VCNs in ```layer_node.py```, including Conv2dNode and BN2dNode, when building a customized multi-task model (should be inherited from ```mtl_model.py```) in PyTorch. 
@@ -11,13 +13,13 @@ The arXiv version can be found [here](https://arxiv.org/pdf/2110.13076.pdf).
 ### Abstract
 Multi-task learning (MTL) jointly learns a set of tasks. It is a promising approach to reduce the training and inference time and storage costs while improving prediction accuracy and generalization performance for many computer vision tasks. However, a major barrier preventing the widespread adoption of MTL is the lack of systematic support for developing compact multi-task models given a set of tasks. In this paper, we aim to remove the barrier by developing the first programming framework AutoMTL that automates MTL model development. AutoMTL takes as inputs an arbitrary backbone convolutional neural network and a set of tasks to learn, then automatically produce a multi-task model that achieves high accuracy and has small memory footprint simultaneously. As a programming framework, AutoMTL could facilitate the development of MTL-enabled computer vision applications and even further improve task performance.
 
-![overview](https://github.com/zhanglijun95/AutoMTL/blob/main/assets/overview.jpg)
+![Framework](https://github.com/zhanglijun95/AutoMTL/blob/main/assets/framework.jpg)
 
 ### Cite
 Welcome to cite our work if you find it is helpful to your research.
 ```
 @misc{zhang2021automtl,
-      title={AutoMTL: A Programming Framework for Automated Multi-Task Learning}, 
+      title={AutoMTL: A Programming Framework for Automating Efficient Multi-Task Learning}, 
       author={Lijun Zhang and Xiao Liu and Hui Guan},
       year={2021},
       eprint={2110.13076},
